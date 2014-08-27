@@ -19,31 +19,35 @@ var gameEngine =
 
 	//The updateModeLooper for your modes. initializer is the initializer, deleter is deleter, updater is updater, queue is the manifest load queue for loading screen and handling of loading assets.
 	//Set up these and I'll update 4 U
-	updateModeLooper: function ( initializer, deleter, updater, queue )
+	updateModeLooper: function ( initializer, deleter, updater, queues )
 	{
 		this.initialized = false;
-		this.queue = queue;
+		this.queues = queues;
 		this.initializer = initializer;
 		this.deleter = deleter;
 		this.updater = updater;
 		this.update = function ()
 		{
-			queue = this.queue;
-			if ( queue == null || !queue.loaded )
+			var notLoaded = false;
+			for ( i = 0; i < this.queues.length; i++ )
 			{
-				gameEngine.loadingUpdate( this.queue );
+				if ( !this.queues[i].loaded ) notLoaded = true;
+			}
+			if ( this.queues != null && notLoaded )
+			{
+				gameEngine.loadingUpdate( this.queues );
 			}
 			else
 			{
 				if ( this.initialized )
 				{
-					gameEngine.removeAll();
-					this.initializer();
-					this.initialized = true;
+					this.updater();
 				}
 				else
 				{
-					this.updater();
+					gameEngine.removeAll();
+					this.initializer();
+					this.initialized = true;
 				}
 			}
 		};
@@ -97,13 +101,13 @@ var gameEngine =
 		gameEngine.barBorder.graphics.beginStroke( "#FFF" ).drawRect( 0, 0, gameEngine.loadingTextWidth, 10 );
 		gameEngine.barBorder.x = ( gameEngine.stage.canvas.width / 2 ) - ( gameEngine.loadingTextWidth / 2 );
 		gameEngine.barBorder.y = ( gameEngine.stage.canvas.height / 2 ) + ( loadingTextHeight / 2 );
-		stage.addChild( barBorder );
+		gameEngine.stage.addChild( gameEngine.barBorder );
 
 		gameEngine.progressBar = new createjs.Shape();
 		gameEngine.progressBar.graphics.beginFill( "#FFF" ).drawRect( 0, 0, 0, 10 );
 		gameEngine.progressBar.x = ( gameEngine.stage.canvas.width / 2 ) - ( gameEngine.loadingTextWidth / 2 );
 		gameEngine.progressBar.y = ( gameEngine.stage.canvas.height / 2 ) + ( loadingTextHeight / 2 );
-		stage.addChild( gameEngine.progressBar );
+		gameEngine.stage.addChild( gameEngine.progressBar );
 		gameEngine.loadingInitialized = true;
 	},
 
@@ -114,12 +118,17 @@ var gameEngine =
 		gameEngine.loadingInitialized = false;
 	},
 
-	loadingUpdate: function (queue)
+	loadingUpdate: function (queues)
 	{
 		if(gameEngine.loadingInitialized)
 		{
-			if ( queue == null ) gameEngine.progressBar.graphics.beginFill( "#FFF" ).drawRect( 0, 0, 0, 10 );
-			else gameEngine.progressBar.graphics.beginFill( "#FFF" ).drawRect( 0, 0, gameEngine.loadingTextWidth * queue.progress, 10 );
+			var progress = 0;
+			for ( i = 0; i < queues.length; i++ )
+			{
+				progress += queues[i].progress;
+			}
+			progress /= queues.length;
+			gameEngine.progressBar.graphics.beginFill( "#FFF" ).drawRect( 0, 0, gameEngine.loadingTextWidth * progress, 10 );
 		}
 		else
 		{
@@ -132,7 +141,7 @@ var gameEngine =
 	//the loop, don't touch
 	loop: function()
 	{
-		if ( gameEngine.updateModeLooperArray[gameEngine.mode] != null ) gameEngine.updateModeLooperArray[gameEngine.mode].update();
+		if ( gameEngine.updateModeLooperArray.get(gameEngine.mode) != null ) gameEngine.updateModeLooperArray.get(gameEngine.mode).update();
 		gameEngine.stage.update();
 	},
 
@@ -402,7 +411,7 @@ var gameEngine =
 	}
 }
 
-var andrewMain, wardellMain, josephMain;
+var wardellMain, josephMain;
 if ( !!( window.addEventListener ) )
 {
 	window.addEventListener( "DOMContentLoaded", gameEngine.main );
