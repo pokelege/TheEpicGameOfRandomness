@@ -2,7 +2,8 @@
 var gameEngine =
 {
 	mode:"title",
-	MAINFPS:30,
+	MAINFPS: 30,
+	DT:1/gameEngine.MAINFPS,
 	CANVASWIDTH: 800,
 	CANVASHEIGHT: 600,
 	stage: null,

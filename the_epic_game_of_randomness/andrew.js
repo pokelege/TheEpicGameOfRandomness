@@ -200,6 +200,75 @@ function level5Loaded()
 
 }
 
+function vec2(x, y)
+{
+	this.x = x;
+	this.y = y;
+	normalize = function()
+	{
+		var magnitude = Math.sqrt(( x * x ) + ( y * y ) );
+		return new vec2( x / magnitude, y / magnitude );
+	}
+	add = function(addWith)
+	{
+		return new vec2( addWith.x + x, addWith.y + y );
+	}
+	subtract = function(subtractWith)
+	{
+		return new vec2( x - subtractWith.x, y - subtractWith.y );
+	}
+	multiply = function(multiplyWith)
+	{
+		return new vec2(x * multiplyWith, y * multiplyWith);
+	}
+}
+
+var camera = new vec2( 0, 0 );
+function moveableObject(sprite, initialPosition, velocity)
+{
+	this.sprite = sprite;
+	this.position = initialPosition;
+	this.velocity = velocity;
+}
+var player;
+var enemies;
+var boss;
+var background, backgroundDepth;
+var foreground, foregroundDepth;
+var mainground, maingroundDepth;
+
+function playerMovement()
+{
+	if(gameEngine.ArrowUp || gameEngine.WPressed)
+	{
+		player.position.y -= player.velocity * gameEngine.DT;
+	}
+	if(gameEngine.ArrowDown || gameEngine.SPressed)
+	{
+		player.position.y += player.velocity * gameEngine.DT;
+	}
+	if ( gameEngine.ArrowLeft || gameEngine.APressed )
+	{
+		player.position.x -= player.velocity * gameEngine.DT;
+	}
+	if ( gameEngine.ArrowRight || gameEngine.DPressed )
+	{
+		player.position.x += player.velocity * gameEngine.DT;
+	}
+
+	player.sprite.x = player.position.x - camera.x;
+	player.sprite.y = player.position.y - camera.y;
+}
+
+function enemyMovement()
+{
+	for(i= 0; i < enemies.length; i++)
+	{
+		enemies[i].position.add( enemies[i].position.subtract( player.position ).normalize().multiply( enemies[i].velocity ) );
+		enemies[i].sprite.x = enemies[i].position.x - camera.x;
+		enemies[i].sprite.y = enemies[i].position.y - camera.y;
+	}
+}
 
 function level1Init()
 {
