@@ -387,9 +387,22 @@ var gameEngine =
 		gameEngine.setUpCanvas();
 		createjs.Ticker.addEventListener( "tick", gameEngine.loop );
 		createjs.Ticker.setFPS( gameEngine.MAINFPS );
+		if(andrewMain)
+		{
+			andrewMain();
+		}
+		if(wardellMain)
+		{
+			wardellMain();
+		}
+		if(josephMain)
+		{
+			josephMain();
+		}
 	}
 }
 
+var andrewMain, wardellMain, josephMain;
 if ( !!( window.addEventListener ) )
 {
 	window.addEventListener( "DOMContentLoaded", gameEngine.main );
