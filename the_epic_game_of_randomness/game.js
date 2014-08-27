@@ -3,7 +3,7 @@ var gameEngine =
 {
 	mode:"title",
 	MAINFPS: 30,
-	DT:1/gameEngine.MAINFPS,
+	DT:1/30,
 	CANVASWIDTH: 800,
 	CANVASHEIGHT: 600,
 	stage: null,
@@ -56,17 +56,20 @@ var gameEngine =
 
 	//add your updateModeLoopers to this map
 	updateModeLooperArray: new Map(),
+	updateModeLooperKeys: new Array(),
+	addModeLooper: function(key, theUpdateModeLooper)
+	{
+		gameEngine.updateModeLooperKeys.push( key );
+		gameEngine.updateModeLooperArray.set( key, theUpdateModeLooper );
+	},
 
 	//call this to delete all stages based on your deleter
 	removeAll: function()
 	{
-		for(var m in gameEngine.updateModeLooperArray)
+		for ( i = 0; i < gameEngine.updateModeLooperKeys.length; i++ )
 		{
-			if(gameEngine.updateModeLooperArray[m].initialized)
-			{
-				gameEngine.updateModeLooperArray[m].deleter();
-				gameEngine.updateModeLooperArray[m].initialized = false;
-			}
+			gameEngine.updateModeLooperArray.get( gameEngine.updateModeLooperKeys[i] ).deleter();
+			gameEngine.updateModeLooperArray.get( gameEngine.updateModeLooperKeys[i] ).initialized = false;
 		}
 		if ( gameEngine.loadingInitialized )
 		{

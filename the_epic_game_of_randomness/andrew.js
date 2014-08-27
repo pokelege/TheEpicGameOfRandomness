@@ -1,18 +1,26 @@
 //#region title
 var titleManifest =
 [
-	{ src: "images/title.jpg", id: "title" }
+	{ src: "images/title.jpg", id: "title" },
+	{ src: "images/playButton.png", id: "playButton" },
 ];
 var titleQueue;
-var titleScreen;
+var titleScreen, playButton;
 function titleLoaded()
 {
 	titleScreen = new createjs.Bitmap( titleQueue[0].getResult( "title" ) );
+	playButton = new createjs.Bitmap( titleQueue[0].getResult( "playButton" ) );
+	playButton.on( "click", function ( evt ) { gameEngine.mode = "characterSelect"; } );
+	playButton.regX = playButton.getBounds().width / 2;
+	playButton.regY = playButton.getBounds().height / 2;
+	playButton.x = gameEngine.CANVASWIDTH / 2;
+	playButton.y = gameEngine.CANVASHEIGHT / 2;
 }
 
 function titleInit()
 {
 	gameEngine.stage.addChild( titleScreen );
+	gameEngine.stage.addChild( playButton );
 }
 function titleDelete()
 {
@@ -108,7 +116,7 @@ function gameoverUpdate()
 //#region characterSelect
 var characterSelectManifest =
 	[
-		{ src: "images/characterSelect.jpg", id: "characterSelect" }
+		{ src: "images/characterSelect.png", id: "characterSelect" }
 	];
 var characterSelectQueue;
 var characterSelect;
@@ -207,7 +215,11 @@ function vec2(x, y)
 	normalize = function()
 	{
 		var magnitude = Math.sqrt(( x * x ) + ( y * y ) );
-		return new vec2( x / magnitude, y / magnitude );
+		if ( magnitude === 0 )
+		{
+			return new vec2( 0, 0 );
+		}
+		else return new vec2( x / magnitude, y / magnitude );
 	}
 	add = function(addWith)
 	{
@@ -352,31 +364,31 @@ function andrewMain()
 	titleQueue.push(new createjs.LoadQueue( true, "assets/" ));
 	titleQueue[0].on( "complete", titleLoaded, this );
 	titleQueue[0].loadManifest( titleManifest );
-	gameEngine.updateModeLooperArray.set( "title", new gameEngine.updateModeLooper( titleInit, titleDelete, titleUpdate, titleQueue ) );
+	gameEngine.addModeLooper( "title", new gameEngine.updateModeLooper( titleInit, titleDelete, titleUpdate, titleQueue ) );
 
 	instructionsQueue = new Array();
 	instructionsQueue.push(new createjs.LoadQueue( true, "assets/" ));
 	instructionsQueue[0].on( "complete", instructionsLoaded, this );
 	instructionsQueue[0].loadManifest( instructionsManifest );
-	gameEngine.updateModeLooperArray.set( "instructions", new gameEngine.updateModeLooper( instructionsInit, instructionsDelete, instructionsUpdate, instructionsQueue ) );
+	gameEngine.addModeLooper( "instructions", new gameEngine.updateModeLooper( instructionsInit, instructionsDelete, instructionsUpdate, instructionsQueue ) );
 
 	creditsQueue = new Array();
 	creditsQueue.push(new createjs.LoadQueue( true, "assets/" ));
 	creditsQueue[0].on( "complete", creditsLoaded, this );
 	creditsQueue[0].loadManifest( creditsManifest );
-	gameEngine.updateModeLooperArray.set( "credits", new gameEngine.updateModeLooper( creditsInit, creditsDelete, creditsUpdate, creditsQueue ) );
+	gameEngine.addModeLooper( "credits", new gameEngine.updateModeLooper( creditsInit, creditsDelete, creditsUpdate, creditsQueue ) );
 
 	gameoverQueue = new Array();
 	gameoverQueue.push(new createjs.LoadQueue( true, "assets/" ));
 	gameoverQueue[0].on( "complete", gameoverLoaded, this );
 	gameoverQueue[0].loadManifest( gameoverManifest );
-	gameEngine.updateModeLooperArray.set( "gameover", new gameEngine.updateModeLooper( gameoverInit, gameoverDelete, gameoverUpdate, gameoverQueue ) );
+	gameEngine.addModeLooper( "gameover", new gameEngine.updateModeLooper( gameoverInit, gameoverDelete, gameoverUpdate, gameoverQueue ) );
 
 	characterSelectQueue = new Array();
 	characterSelectQueue.push(new createjs.LoadQueue( true, "assets/" ));
 	characterSelectQueue[0].on( "complete", characterSelectLoaded, this );
 	characterSelectQueue[0].loadManifest( characterSelectManifest );
-	gameEngine.updateModeLooperArray.set( "characterSelect", new gameEngine.updateModeLooper( characterSelectInit, characterSelectDelete, characterSelectUpdate, characterSelectQueue ) );
+	gameEngine.addModeLooper( "characterSelect", new gameEngine.updateModeLooper( characterSelectInit, characterSelectDelete, characterSelectUpdate, characterSelectQueue ) );
 
 	mainGameQueue = new createjs.LoadQueue( true, "assets/" );
 	mainGameQueue.on( "complete", characterSelectLoaded, this );
@@ -387,33 +399,33 @@ function andrewMain()
 	Level1Queue[0].on( "complete", level1Loaded );
 	Level1Queue[0].loadManifest( Level1Manifest );
 	Level1Queue.push( mainGameQueue );
-	gameEngine.updateModeLooperArray.set( "level1", new gameEngine.updateModeLooper( level1Init, level1Delete, level1Update, Level1Queue ) );
+	gameEngine.addModeLooper( "level1", new gameEngine.updateModeLooper( level1Init, level1Delete, level1Update, Level1Queue ) );
 
 	Level2Queue = new Array();
 	Level2Queue.push( new createjs.LoadQueue( true, "assets/" ) );
 	Level2Queue[0].on( "complete", level2Loaded );
 	Level2Queue[0].loadManifest( Level2Manifest );
 	Level2Queue.push( mainGameQueue );
-	gameEngine.updateModeLooperArray.set( "level2", new gameEngine.updateModeLooper( level2Init, level2Delete, level2Update, Level2Queue ) );
+	gameEngine.addModeLooper( "level2", new gameEngine.updateModeLooper( level2Init, level2Delete, level2Update, Level2Queue ) );
 
 	Level3Queue = new Array();
 	Level3Queue.push( new createjs.LoadQueue( true, "assets/" ) );
 	Level3Queue[0].on( "complete", level3Loaded );
 	Level3Queue[0].loadManifest( Level3Manifest );
 	Level3Queue.push( mainGameQueue );
-	gameEngine.updateModeLooperArray.set( "level3", new gameEngine.updateModeLooper( level3Init, level3Delete, level3Update, Level3Queue ) );
+	gameEngine.addModeLooper( "level3", new gameEngine.updateModeLooper( level3Init, level3Delete, level3Update, Level3Queue ) );
 
 	Level4Queue = new Array();
 	Level4Queue.push( new createjs.LoadQueue( true, "assets/" ) );
 	Level4Queue[0].on( "complete", level4Loaded );
 	Level4Queue[0].loadManifest( Level4Manifest );
 	Level4Queue.push( mainGameQueue );
-	gameEngine.updateModeLooperArray.set( "level4", new gameEngine.updateModeLooper( level4Init, level4Delete, level4Update, Level4Queue ) );
+	gameEngine.addModeLooper( "level4", new gameEngine.updateModeLooper( level4Init, level4Delete, level4Update, Level4Queue ) );
 
 	Level5Queue = new Array();
 	Level5Queue.push( new createjs.LoadQueue( true, "assets/" ) );
 	Level5Queue[0].on( "complete", level5Loaded );
 	Level5Queue[0].loadManifest( Level5Manifest );
 	Level5Queue.push( mainGameQueue );
-	gameEngine.updateModeLooperArray.set( "level1", new gameEngine.updateModeLooper( level5Init, level5Delete, level5Update, Level5Queue ) );
+	gameEngine.addModeLooper( "level1", new gameEngine.updateModeLooper( level5Init, level5Delete, level5Update, Level5Queue ) );
 }
