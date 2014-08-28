@@ -120,6 +120,7 @@ var characterSelectManifest =
 	];
 var characterSelectQueue;
 var characterSelect;
+var characterMode = "jamie";
 function characterSelectLoaded()
 {
 	characterSelect = new createjs.Bitmap( characterSelectQueue[0].getResult( "characterSelect" ) );
@@ -128,11 +129,13 @@ function characterSelectLoaded()
 function characterSelectInit()
 {
 	gameEngine.stage.addChild( characterSelect );
+	gameEngine.stage.on( "click", function ( evt ) { if ( evt.stageX < gameEngine.CANVASWIDTH / 2 ) characterMode = "jamie"; else characterMode = "halladay"; gameEngine.mode = "level4" } );
 }
 
 function characterSelectDelete()
 {
 	gameEngine.stage.removeAllChildren();
+	gameEngine.stage.removeAllEventListeners();
 }
 function characterSelectUpdate()
 {
@@ -144,9 +147,9 @@ function characterSelectUpdate()
 //#region mainGame
 var mainGameManifest =
 	[
-
+		{ src: "images/jamieChara.png", id: "jamieChara" }
 	];
-var mainGameQueue;
+var mainGameQueue, jamieChara;
 
 var Level1Manifest =
 	[
@@ -168,9 +171,9 @@ var Level3Queue;
 
 var Level4Manifest =
 	[
-
+		{ src: "images/enemy.png", id: "enemy" }
 	];
-var Level4Queue;
+var Level4Queue, level4Enemy;
 
 var Level5Manifest =
 	[
@@ -181,7 +184,27 @@ var Level5Queue;
 
 function mainGameLoaded()
 {
+	var jamieCharaSheet = new createjs.SpriteSheet
+	(
+		{
+			images: [mainGameQueue.getResult( "jamieChara" )],
+			frames:
+				{
+					regX: 92 / 2,
+					regY: 146 / 2,
+					width: 92,
+					height: 146
+				},
+			animations:
+				{
+					NeutralFront: [0, 0, "NeutralFront"],
+					Run: [1, 4, "RunLoop"],
+					RunLoop: [5, 24, "RunLoop"]
+				}
+		}
+	);
 
+	jamieChara = new createjs.Sprite( jamieCharaSheet, "NeutralFront" );
 }
 
 function level1Loaded()
@@ -200,7 +223,21 @@ function level3Loaded()
 
 function level4Loaded()
 {
-
+	var enemySheet = new createjs.SpriteSheet
+		(
+		{
+			images: [Level4Queue[0].getResult( "enemy" )],
+			frames:
+				[[0, 0, 173, 134, 0, 109, 83], [0, 0, 173, 134, 0, 109, 83], [178, 0, 183, 144, 0, 114, 87], [0, 149, 195, 155, 0, 120, 93], [200, 149, 205, 166, 0, 125, 98], [0, 320, 217, 178, 0, 131, 104], [222, 320, 228, 189, 0, 137, 109], [0, 514, 240, 199, 0, 143, 114], [245, 514, 250, 211, 0, 148, 120], [0, 730, 265, 224, 0, 155, 127]],
+			animations:
+				{
+					Neutral: [0, 0],
+					Die: [1, 9, false]
+				}
+		}
+		);
+	level4Enemy = new createjs.Sprite( enemySheet, "Neutral" );
+	level4Enemy.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
 }
 
 function level5Loaded()
@@ -212,26 +249,26 @@ function vec2(x, y)
 {
 	this.x = x;
 	this.y = y;
-	normalize = function()
+	this.normalize = function()
 	{
-		var magnitude = Math.sqrt(( x * x ) + ( y * y ) );
+		var magnitude = Math.sqrt(( this.x * this.x ) + ( this.y * this.y ) );
 		if ( magnitude === 0 )
 		{
 			return new vec2( 0, 0 );
 		}
-		else return new vec2( x / magnitude, y / magnitude );
+		else return new vec2( this.x / magnitude, this.y / magnitude );
 	}
-	add = function(addWith)
+	this.add = function(addWith)
 	{
-		return new vec2( addWith.x + x, addWith.y + y );
+		return new vec2( addWith.x + this.x, addWith.y + this.y );
 	}
-	subtract = function(subtractWith)
+	this.subtract = function(subtractWith)
 	{
-		return new vec2( x - subtractWith.x, y - subtractWith.y );
+		return new vec2( this.x - subtractWith.x, this.y - subtractWith.y );
 	}
-	multiply = function(multiplyWith)
+	this.multiply = function(multiplyWith)
 	{
-		return new vec2(x * multiplyWith, y * multiplyWith);
+		return new vec2( this.x * multiplyWith, this.y * multiplyWith );
 	}
 }
 
@@ -274,14 +311,35 @@ function playerMovement()
 
 function enemyMovement()
 {
-	for(i= 0; i < enemies.length; i++)
+	for(i = 0; i < enemies.length; i++)
 	{
-		enemies[i].position.add( enemies[i].position.subtract( player.position ).normalize().multiply( enemies[i].velocity ) );
+		enemies[i].position = enemies[i].position.add( player.position.subtract( enemies[i].position ).normalize().multiply( enemies[i].velocity ) );
 		enemies[i].sprite.x = enemies[i].position.x - camera.x;
 		enemies[i].sprite.y = enemies[i].position.y - camera.y;
 	}
 }
 
+function cameraFollowPlayer()
+{
+	if(player.sprite.x < gameEngine.CANVASWIDTH * 0.01)
+	{
+		camera.x += player.sprite.x - (gameEngine.CANVASWIDTH * 0.01)
+	}
+	if ( player.sprite.x > gameEngine.CANVASWIDTH * 0.99 )
+	{
+		camera.x += player.sprite.x - ( gameEngine.CANVASWIDTH * 0.99 )
+	}
+	if ( player.sprite.y < gameEngine.CANVASHEIGHT * 0.01 )
+	{
+		camera.y += player.sprite.y - ( gameEngine.CANVASHEIGHT * 0.01 )
+	}
+	if ( player.sprite.y > gameEngine.CANVASHEIGHT * 0.99 )
+	{
+		camera.y += player.sprite.y - ( gameEngine.CANVASHEIGHT * 0.99 )
+	}
+}
+
+//#region level1
 function level1Init()
 {
 
@@ -296,7 +354,9 @@ function level1Update()
 {
 
 }
+//#endregion
 
+//#region level2
 function level2Init()
 {
 
@@ -311,7 +371,9 @@ function level2Update()
 {
 
 }
+//#endregion
 
+//#region level3
 function level3Init()
 {
 
@@ -326,22 +388,35 @@ function level3Update()
 {
 
 }
+//#endregion
 
+//#region level4
 function level4Init()
 {
-
+	player = new moveableObject( jamieChara.clone(), new vec2( 10, 100 ), 300 );
+	gameEngine.stage.addChild( player.sprite );
+	enemies = new Array();
+	for(i = 0; i < 5; i++)
+	{
+		enemies.push( new moveableObject( level4Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( 100 * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), 5 ) );
+		gameEngine.stage.addChild( enemies[i].sprite );
+	}
 }
 
 function level4Delete()
 {
-
+	gameEngine.stage.removeAllChildren();
 }
 
 function level4Update()
 {
-
+	playerMovement();
+	enemyMovement();
+	cameraFollowPlayer();
 }
+//#endregion
 
+//#region level5
 function level5Init()
 {
 
@@ -356,6 +431,7 @@ function level5Update()
 {
 
 }
+//#endregion
 
 //#endregion
 function andrewMain()
@@ -391,7 +467,7 @@ function andrewMain()
 	gameEngine.addModeLooper( "characterSelect", new gameEngine.updateModeLooper( characterSelectInit, characterSelectDelete, characterSelectUpdate, characterSelectQueue ) );
 
 	mainGameQueue = new createjs.LoadQueue( true, "assets/" );
-	mainGameQueue.on( "complete", characterSelectLoaded, this );
+	mainGameQueue.on( "complete", mainGameLoaded, this );
 	mainGameQueue.loadManifest( mainGameManifest );
 
 	Level1Queue = new Array();
