@@ -147,9 +147,10 @@ function characterSelectUpdate()
 //#region mainGame
 var mainGameManifest =
 	[
-		{ src: "images/jamieChara.png", id: "jamieChara" }
+		{ src: "images/jamieChara.png", id: "jamieChara" },
+		{ src: "images/pixel.png", id: "pixel" }
 	];
-var mainGameQueue, jamieChara;
+var mainGameQueue, jamieChara, pixel;
 
 var Level1Manifest =
 	[
@@ -197,14 +198,16 @@ function mainGameLoaded()
 				},
 			animations:
 				{
-					NeutralFront: [0, 0, "NeutralFront"],
+					Neutral: [0, 0, "Neutral"],
 					Run: [1, 4, "RunLoop"],
 					RunLoop: [5, 24, "RunLoop"]
 				}
 		}
 	);
 
-	jamieChara = new createjs.Sprite( jamieCharaSheet, "NeutralFront" );
+	jamieChara = new createjs.Sprite( jamieCharaSheet, "Neutral" );
+	
+	pixel = new createjs.Bitmap( mainGameQueue.getResult( "pixel" ) );
 }
 
 function level1Loaded()
@@ -270,6 +273,10 @@ function vec2(x, y)
 	{
 		return new vec2( this.x * multiplyWith, this.y * multiplyWith );
 	}
+	this.equals = function(equalWith)
+	{
+		return (x === equalWith.x && y === equalWith.y);
+	}
 }
 
 var camera = new vec2( 0, 0 );
@@ -279,6 +286,59 @@ function moveableObject(sprite, initialPosition, velocity)
 	this.position = initialPosition;
 	this.velocity = velocity;
 }
+
+function shortRangeAttack(x, y, width, height)
+{
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+
+	this.collideSprite = function(theSpriteFrom, theSpriteTo)
+	{
+		var pixelTest = pixel.clone();
+		pixelTest.x = this.x + theSpriteFrom.x;
+		pixelTest.y = this.y + theSpriteFrom.y;
+		pixelTest.scaleX = this.width;
+		pixelTest.scaleY = this.height;
+		return ndgmr.checkPixelCollision( pixelTest, theSpriteTo, 0 );
+	}
+}
+
+function moveableAttacker(moveable, attacker)
+{
+	this.moveable = moveable;
+	this.attacker = attacker;
+}
+
+function cage(top, bottom, left, right)
+{
+	this.top = top;
+	this.bottom = bottom;
+	this.left = left;
+	this.right = right;
+
+	this.contain = function(moveable)
+	{
+		if(moveable.position.x > this.right)
+		{
+			moveable.position.x = this.right;
+		}
+		if(moveable.position.x < this.left)
+		{
+			moveable.position.x = this.left;
+		}
+		if(moveable.position.y > this.bottom)
+		{
+			moveable.position.y = this.bottom;
+		}
+		if(moveable.position.y < this.top)
+		{
+			moveable.position.y = this.top;
+		}
+	}
+}
+
 var player;
 var enemies;
 var boss;
@@ -286,59 +346,103 @@ var background, backgroundDepth;
 var foreground, foregroundDepth;
 var mainground, maingroundDepth;
 var spriteArray;
+var stageBounds;
 function playerMovement()
 {
 	var posToAdd = new vec2( 0, 0 );
 	if(gameEngine.ArrowUp || gameEngine.WPressed)
 	{
-		posToAdd = posToAdd.subtract( new vec2( 0, player.velocity * gameEngine.DT ) );
+		posToAdd = posToAdd.subtract( new vec2( 0, player.moveable.velocity * gameEngine.DT ) );
 	//	player.position.y -= player.velocity * gameEngine.DT;
 	}
 	if(gameEngine.ArrowDown || gameEngine.SPressed)
 	{
-		posToAdd = posToAdd.add( new vec2( 0, player.velocity * gameEngine.DT )  );
+		posToAdd = posToAdd.add( new vec2( 0, player.moveable.velocity * gameEngine.DT )  );
 		//player.position.y += player.velocity * gameEngine.DT;
 	}
 	if ( gameEngine.ArrowLeft || gameEngine.APressed )
 	{
-		posToAdd = posToAdd.subtract( new vec2( player.velocity * gameEngine.DT, 0 )  );
+		posToAdd = posToAdd.subtract( new vec2( player.moveable.velocity * gameEngine.DT, 0 )  );
 		//player.position.x -= player.velocity * gameEngine.DT;
 	}
 	if ( gameEngine.ArrowRight || gameEngine.DPressed )
 	{
 		//player.position.x += player.velocity * gameEngine.DT;
-		posToAdd = posToAdd.add( new vec2( player.velocity * gameEngine.DT, 0 )  );
+		posToAdd = posToAdd.add( new vec2( player.moveable.velocity * gameEngine.DT, 0 )  );
 	}
-	player.position =  player.position.add( posToAdd );
-	player.sprite.x = player.position.x - camera.x;
-	player.sprite.y = player.position.y - camera.y;
+
+	if ( posToAdd.equals( new vec2( 0, 0 ) ) )
+	{
+		if ( player.moveable.sprite.currentAnimation != "Neutral" )
+		{
+			player.moveable.sprite.gotoAndPlay( "Neutral" );
+		}
+	}
+	else
+	{
+		if ( posToAdd.x > 0 )
+		{
+			if(player.moveable.sprite.scaleX < 0)
+			{
+				player.moveable.sprite.scaleX *= -1;
+			}
+		}
+		else if ( posToAdd.x < 0 )
+		{
+			if ( player.moveable.sprite.scaleX > 0 )
+			{
+				player.moveable.sprite.scaleX *= -1;
+			}
+		}
+		if ( player.moveable.sprite.currentAnimation == "Neutral" )
+		{
+			player.moveable.sprite.gotoAndPlay("Run");
+		}
+		player.moveable.position = player.moveable.position.add( posToAdd );
+		stageBounds.contain( player.moveable );
+	}
+
+	if(gameEngine.ZPressed || gameEngine.IPressed)
+	{
+		for(i = 0; i < enemies.length; i++)
+		{
+			if ( enemies[i].moveable.sprite.visible && enemies[i].moveable.sprite.currentAnimation != "Die")
+			{
+				if ( player.attacker.collideSprite( player.moveable.sprite, enemies[i].moveable.sprite ) )
+				{
+					enemies[i].moveable.sprite.gotoAndPlay( "Die" );
+				}
+			}
+		}
+	}
 }
 
 function enemyMovement()
 {
 	for(i = 0; i < enemies.length; i++)
 	{
-		enemies[i].position = enemies[i].position.add( player.position.subtract( enemies[i].position ).normalize().multiply( enemies[i].velocity ) );
+		enemies[i].moveable.position = enemies[i].moveable.position.add( player.moveable.position.subtract( enemies[i].moveable.position ).normalize().multiply( enemies[i].moveable.velocity ) );
+		stageBounds.contain( enemies[i].moveable );
 	}
 }
 
 function cameraFollowPlayer()
 {
-	if(player.sprite.x < gameEngine.CANVASWIDTH * 0.1)
+	if(player.moveable.sprite.x < gameEngine.CANVASWIDTH * 0.1)
 	{
-		camera.x += player.sprite.x - (gameEngine.CANVASWIDTH * 0.1)
+		camera.x += player.moveable.sprite.x - (gameEngine.CANVASWIDTH * 0.1)
 	}
-	if ( player.sprite.x > gameEngine.CANVASWIDTH * 0.9 )
+	if ( player.moveable.sprite.x > gameEngine.CANVASWIDTH * 0.9 )
 	{
-		camera.x += player.sprite.x - ( gameEngine.CANVASWIDTH * 0.9 )
+		camera.x += player.moveable.sprite.x - ( gameEngine.CANVASWIDTH * 0.9 )
 	}
-	if ( player.sprite.y < gameEngine.CANVASHEIGHT * 0.1 )
+	if ( player.moveable.sprite.y < gameEngine.CANVASHEIGHT * 0.1 )
 	{
-		camera.y += player.sprite.y - ( gameEngine.CANVASHEIGHT * 0.1 )
+		camera.y += player.moveable.sprite.y - ( gameEngine.CANVASHEIGHT * 0.1 )
 	}
-	if ( player.sprite.y > gameEngine.CANVASHEIGHT * 0.9 )
+	if ( player.moveable.sprite.y > gameEngine.CANVASHEIGHT * 0.9 )
 	{
-		camera.y += player.sprite.y - ( gameEngine.CANVASHEIGHT * 0.9 )
+		camera.y += player.moveable.sprite.y - ( gameEngine.CANVASHEIGHT * 0.9 )
 	}
 }
 
@@ -409,16 +513,17 @@ function level3Update()
 function level4Init()
 {
 	spriteArray = new Array();
-	player = new moveableObject( jamieChara.clone(), new vec2( 10, 100 ), 300 );
-	spriteArray.push( player );
-	gameEngine.stage.addChild( player.sprite );
+	player = new moveableAttacker(new moveableObject( jamieChara.clone(), new vec2( 10, 100 ), 300 ), new shortRangeAttack(0,0,100,10));
+	spriteArray.push( player.moveable );
+	gameEngine.stage.addChild( player.moveable.sprite );
 	enemies = new Array();
 	for(i = 0; i < 5; i++)
 	{
-		enemies.push( new moveableObject( level4Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( 100 * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ) );
-		spriteArray.push( enemies[i] );
-		gameEngine.stage.addChild( enemies[i].sprite );
+		enemies.push( new moveableAttacker(new moveableObject( level4Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( 100 * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack(0,0,10,10 )));
+		spriteArray.push( enemies[i].moveable );
+		gameEngine.stage.addChild( enemies[i].moveable.sprite );
 	}
+	stageBounds = new cage( gameEngine.CANVASHEIGHT / 2, gameEngine.CANVASHEIGHT, 0, 10000 );
 }
 
 function level4Delete()
