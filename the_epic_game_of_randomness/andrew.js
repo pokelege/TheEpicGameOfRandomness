@@ -285,26 +285,31 @@ var boss;
 var background, backgroundDepth;
 var foreground, foregroundDepth;
 var mainground, maingroundDepth;
-
+var spriteArray;
 function playerMovement()
 {
+	var posToAdd = new vec2( 0, 0 );
 	if(gameEngine.ArrowUp || gameEngine.WPressed)
 	{
-		player.position.y -= player.velocity * gameEngine.DT;
+		posToAdd = posToAdd.subtract( new vec2( 0, player.velocity * gameEngine.DT ) );
+	//	player.position.y -= player.velocity * gameEngine.DT;
 	}
 	if(gameEngine.ArrowDown || gameEngine.SPressed)
 	{
-		player.position.y += player.velocity * gameEngine.DT;
+		posToAdd = posToAdd.add( new vec2( 0, player.velocity * gameEngine.DT )  );
+		//player.position.y += player.velocity * gameEngine.DT;
 	}
 	if ( gameEngine.ArrowLeft || gameEngine.APressed )
 	{
-		player.position.x -= player.velocity * gameEngine.DT;
+		posToAdd = posToAdd.subtract( new vec2( player.velocity * gameEngine.DT, 0 )  );
+		//player.position.x -= player.velocity * gameEngine.DT;
 	}
 	if ( gameEngine.ArrowRight || gameEngine.DPressed )
 	{
-		player.position.x += player.velocity * gameEngine.DT;
+		//player.position.x += player.velocity * gameEngine.DT;
+		posToAdd = posToAdd.add( new vec2( player.velocity * gameEngine.DT, 0 )  );
 	}
-
+	player.position =  player.position.add( posToAdd );
 	player.sprite.x = player.position.x - camera.x;
 	player.sprite.y = player.position.y - camera.y;
 }
@@ -314,28 +319,38 @@ function enemyMovement()
 	for(i = 0; i < enemies.length; i++)
 	{
 		enemies[i].position = enemies[i].position.add( player.position.subtract( enemies[i].position ).normalize().multiply( enemies[i].velocity ) );
-		enemies[i].sprite.x = enemies[i].position.x - camera.x;
-		enemies[i].sprite.y = enemies[i].position.y - camera.y;
 	}
 }
 
 function cameraFollowPlayer()
 {
-	if(player.sprite.x < gameEngine.CANVASWIDTH * 0.01)
+	if(player.sprite.x < gameEngine.CANVASWIDTH * 0.1)
 	{
-		camera.x += player.sprite.x - (gameEngine.CANVASWIDTH * 0.01)
+		camera.x += player.sprite.x - (gameEngine.CANVASWIDTH * 0.1)
 	}
-	if ( player.sprite.x > gameEngine.CANVASWIDTH * 0.99 )
+	if ( player.sprite.x > gameEngine.CANVASWIDTH * 0.9 )
 	{
-		camera.x += player.sprite.x - ( gameEngine.CANVASWIDTH * 0.99 )
+		camera.x += player.sprite.x - ( gameEngine.CANVASWIDTH * 0.9 )
 	}
-	if ( player.sprite.y < gameEngine.CANVASHEIGHT * 0.01 )
+	if ( player.sprite.y < gameEngine.CANVASHEIGHT * 0.1 )
 	{
-		camera.y += player.sprite.y - ( gameEngine.CANVASHEIGHT * 0.01 )
+		camera.y += player.sprite.y - ( gameEngine.CANVASHEIGHT * 0.1 )
 	}
-	if ( player.sprite.y > gameEngine.CANVASHEIGHT * 0.99 )
+	if ( player.sprite.y > gameEngine.CANVASHEIGHT * 0.9 )
 	{
-		camera.y += player.sprite.y - ( gameEngine.CANVASHEIGHT * 0.99 )
+		camera.y += player.sprite.y - ( gameEngine.CANVASHEIGHT * 0.9 )
+	}
+}
+
+function moveableObjectsUpdate(theSprites)
+{
+	for(i = 0; i < theSprites.length; i++)
+	{
+		if ( theSprites[i].sprite.visible )
+		{
+			theSprites[i].sprite.x = theSprites[i].position.x - camera.x;
+			theSprites[i].sprite.y = theSprites[i].position.y - camera.y;
+		}
 	}
 }
 
@@ -393,12 +408,15 @@ function level3Update()
 //#region level4
 function level4Init()
 {
+	spriteArray = new Array();
 	player = new moveableObject( jamieChara.clone(), new vec2( 10, 100 ), 300 );
+	spriteArray.push( player );
 	gameEngine.stage.addChild( player.sprite );
 	enemies = new Array();
 	for(i = 0; i < 5; i++)
 	{
-		enemies.push( new moveableObject( level4Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( 100 * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), 5 ) );
+		enemies.push( new moveableObject( level4Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( 100 * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ) );
+		spriteArray.push( enemies[i] );
 		gameEngine.stage.addChild( enemies[i].sprite );
 	}
 }
@@ -413,6 +431,7 @@ function level4Update()
 	playerMovement();
 	enemyMovement();
 	cameraFollowPlayer();
+	moveableObjectsUpdate( spriteArray );
 }
 //#endregion
 
