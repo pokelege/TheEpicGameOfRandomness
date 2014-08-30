@@ -148,6 +148,7 @@ function characterSelectUpdate()
 var mainGameManifest =
 	[
 		{ src: "images/jamieChara.png", id: "jamieChara" },
+		{ src: "images/jamieChara.png", id: "jamieChara" },
 		{ src: "images/pixel.png", id: "pixel" }
 	];
 var mainGameQueue, jamieChara, pixel;
@@ -172,9 +173,12 @@ var Level3Queue;
 
 var Level4Manifest =
 	[
-		{ src: "images/enemy.png", id: "enemy" }
+		{ src: "images/enemy.png", id: "enemy" },
+		{ src: "images/level4Building.png", id: "level4Building" },
+		{ src: "images/level4BackGround.png", id: "level4BackGround" },
+		{ src: "images/level4Train.png", id: "level4Train" },
 	];
-var Level4Queue, level4Enemy;
+var Level4Queue, level4Enemy, level4Building, level4BackGround, level4Train;
 
 var Level5Manifest =
 	[
@@ -192,7 +196,7 @@ function mainGameLoaded()
 			frames:
 				{
 					regX: 92 / 2,
-					regY: 146 / 2,
+					regY: 146,
 					width: 92,
 					height: 146
 				},
@@ -241,6 +245,10 @@ function level4Loaded()
 		);
 	level4Enemy = new createjs.Sprite( enemySheet, "Neutral" );
 	level4Enemy.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
+
+	level4Building = new createjs.Bitmap( Level4Queue[0].getResult( "level4Building" ) );
+	level4BackGround = new createjs.Bitmap( Level4Queue[0].getResult( "level4BackGround" ) );
+	level4Train = new createjs.Bitmap( Level4Queue[0].getResult( "level4Train" ) );
 }
 
 function level5Loaded()
@@ -279,12 +287,16 @@ function vec2(x, y)
 	}
 }
 
-var camera = new vec2( 0, 0 );
+var camera;
 function moveableObject(sprite, initialPosition, velocity)
 {
 	this.sprite = sprite;
 	this.position = initialPosition;
 	this.velocity = velocity;
+	this.airDistance = 0;
+
+	this.sprite.x = this.position.x;
+	this.sprite.y = this.position.y;
 }
 
 function shortRangeAttack(x, y, width, height)
@@ -320,21 +332,158 @@ function cage(top, bottom, left, right)
 
 	this.contain = function(moveable)
 	{
-		if(moveable.position.x > this.right)
+		if ( moveable )
 		{
-			moveable.position.x = this.right;
+			if ( moveable.position.x > this.right )
+			{
+				moveable.position.x = this.right;
+			}
+			if ( moveable.position.x < this.left )
+			{
+				moveable.position.x = this.left;
+			}
+			if ( moveable.position.y > this.bottom )
+			{
+				moveable.position.y = this.bottom;
+			}
+			if ( moveable.position.y < this.top )
+			{
+				moveable.position.y = this.top;
+			}
 		}
-		if(moveable.position.x < this.left)
+	}
+	this.containCamera = function(camera)
+	{
+		if ( camera )
 		{
-			moveable.position.x = this.left;
+			if ( camera.x + gameEngine.CANVASWIDTH > this.right )
+			{
+				camera.x = this.right - gameEngine.CANVASWIDTH;
+			}
+			if ( camera.x < this.left )
+			{
+				camera.x = this.left;
+			}
+			if ( camera.y + gameEngine.CANVASHEIGHT > this.bottom )
+			{
+				camera.y = this.bottom - gameEngine.CANVASHEIGHT;
+			}
+			if ( camera.y < this.top )
+			{
+				camera.y = this.top;
+			}
 		}
-		if(moveable.position.y > this.bottom)
+	}
+}
+
+function moveableBackdrop(sprite, depth, initialPosition, velocity, seperation, loopVertical, loopHorizonatal)
+{
+	this.sprite = sprite;
+	this.depth = depth;
+	this.seperation = seperation;
+	this.velocity = velocity;
+	this.loopVertical = loopVertical;
+	this.loopHorizontal = loopHorizonatal;
+	this.array = new Array();
+
+	this.array.push( this.sprite.clone() );
+	this.array[0].x = initialPosition.x;
+	this.array[0].y = initialPosition.y;
+
+
+	if(seperation)
+	{
+		if(loopHorizonatal)
 		{
-			moveable.position.y = this.bottom;
+			var currentX = initialPosition.x;
+			var currentY = initialPosition.y;
+			currentX -= seperation.x;
+			currentY -= seperation.y;
+			while(currentX >= -gameEngine.CANVASWIDTH)
+			{
+				var spriteTest = this.sprite.clone();
+				spriteTest.x = currentX;
+				spriteTest.y = currentY;
+				this.array.push( spriteTest );
+				currentX -= seperation.x;
+				currentY -= seperation.y;
+			}
+
+			currentX = initialPosition.x;
+			currentY = initialPosition.y;
+			currentX += seperation.x;
+			currentY += seperation.y;
+			while ( currentX <= gameEngine.CANVASWIDTH * 2 )
+			{
+				var spriteTest = this.sprite.clone();
+				spriteTest.x = currentX;
+				spriteTest.y = currentY;
+				this.array.push( spriteTest );
+				currentX += seperation.x;
+				currentY += seperation.y;
+			}
 		}
-		if(moveable.position.y < this.top)
+		if (loopVertical)
 		{
-			moveable.position.y = this.top;
+			var currentX = initialPosition.x;
+			var currentY = initialPosition.y;
+			currentX -= seperation.x;
+			currentY -= seperation.y;
+			while ( currentY >= -gameEngine.CANVASHEIGHT )
+			{
+				var spriteTest = this.sprite.clone();
+				spriteTest.x = currentX;
+				spriteTest.y = currentY;
+				this.array.push( spriteTest );
+				currentX -= seperation.x;
+				currentY -= seperation.y;
+			}
+
+			currentX = initialPosition.x;
+			currentY = initialPosition.y;
+			currentX += seperation.x;
+			currentY += seperation.y;
+			while ( currentY <= gameEngine.CANVASHEIGHT * 2 )
+			{
+				var spriteTest = this.sprite.clone();
+				spriteTest.x = currentX;
+				spriteTest.y = currentY;
+				this.array.push( spriteTest );
+				currentX += seperation.x;
+				currentY += seperation.y;
+			}
+		}
+	}
+
+	this.move = function(deltaPos)
+	{
+		for( var i = 0; i < this.array.length;i++)
+		{
+			this.array[i].x += (deltaPos.x * depth) + (depth * velocity.x * gameEngine.DT);
+			this.array[i].y += (deltaPos.y * depth) + (depth * velocity.y * gameEngine.DT);
+			if(this.loopHorizontal)
+			{
+				if(this.array[i].x > gameEngine.CANVASWIDTH * 2)
+				{
+					this.array[i].x -= gameEngine.CANVASWIDTH * 3;
+				}
+				else if(this.array[i].x < -gameEngine.CANVASWIDTH)
+				{
+					this.array[i].x += gameEngine.CANVASWIDTH * 3;
+				}
+			}
+
+			if ( this.loopVertical )
+			{
+				if ( this.array[i].y > gameEngine.CANVASHEIGHT * 2 )
+				{
+					this.array[i].y -= gameEngine.CANVASHEIGHT * 3;
+				}
+				else if ( this.array[i].y < -gameEngine.CANVASHEIGHT )
+				{
+					this.array[i].y += gameEngine.CANVASHEIGHT * 3;
+				}
+			}
 		}
 	}
 }
@@ -342,11 +491,13 @@ function cage(top, bottom, left, right)
 var player;
 var enemies;
 var boss;
-var background, backgroundDepth;
-var foreground, foregroundDepth;
-var mainground, maingroundDepth;
 var spriteArray;
 var stageBounds;
+var cameraBounds;
+var backDrops;
+
+var jumpable;
+var MAXJUMPHEIGHT = -100;
 function playerMovement()
 {
 	var posToAdd = new vec2( 0, 0 );
@@ -369,6 +520,30 @@ function playerMovement()
 	{
 		//player.position.x += player.velocity * gameEngine.DT;
 		posToAdd = posToAdd.add( new vec2( player.moveable.velocity * gameEngine.DT, 0 )  );
+	}
+
+	if ( jumpable )
+	{
+		if(gameEngine.SpacePressed && player.moveable.airDistance >= MAXJUMPHEIGHT)
+		{
+			player.moveable.airDistance -= 10;
+		}
+		else
+		{
+			jumpable = false;
+		}
+	}
+	else
+	{
+		if(player.moveable.airDistance < 0)
+		{
+			player.moveable.airDistance += 10;
+		}
+		if(player.moveable.airDistance >= 0)
+		{
+			player.moveable.airDistance = 0;
+			jumpable = true;
+		}
 	}
 
 	if ( posToAdd.equals( new vec2( 0, 0 ) ) )
@@ -404,7 +579,7 @@ function playerMovement()
 
 	if(gameEngine.ZPressed || gameEngine.IPressed)
 	{
-		for(i = 0; i < enemies.length; i++)
+		for(var i = 0; i < enemies.length; i++)
 		{
 			if ( enemies[i].moveable.sprite.visible && enemies[i].moveable.sprite.currentAnimation != "Die")
 			{
@@ -419,7 +594,7 @@ function playerMovement()
 
 function enemyMovement()
 {
-	for(i = 0; i < enemies.length; i++)
+	for(var i = 0; i < enemies.length; i++)
 	{
 		enemies[i].moveable.position = enemies[i].moveable.position.add( player.moveable.position.subtract( enemies[i].moveable.position ).normalize().multiply( enemies[i].moveable.velocity ) );
 		stageBounds.contain( enemies[i].moveable );
@@ -428,6 +603,7 @@ function enemyMovement()
 
 function cameraFollowPlayer()
 {
+	var oldCamera = new vec2( camera.x, camera.y );
 	if(player.moveable.sprite.x < gameEngine.CANVASWIDTH * 0.1)
 	{
 		camera.x += player.moveable.sprite.x - (gameEngine.CANVASWIDTH * 0.1)
@@ -444,16 +620,21 @@ function cameraFollowPlayer()
 	{
 		camera.y += player.moveable.sprite.y - ( gameEngine.CANVASHEIGHT * 0.9 )
 	}
+	cameraBounds.containCamera( camera );
+	for ( var i = 0; i < backDrops.length; i++ )
+	{
+		backDrops[i].move( oldCamera.subtract( camera ) );
+	}
 }
 
 function moveableObjectsUpdate(theSprites)
 {
-	for(i = 0; i < theSprites.length; i++)
+	for( var i = 0; i < theSprites.length; i++)
 	{
 		if ( theSprites[i].sprite.visible )
 		{
 			theSprites[i].sprite.x = theSprites[i].position.x - camera.x;
-			theSprites[i].sprite.y = theSprites[i].position.y - camera.y;
+			theSprites[i].sprite.y = theSprites[i].position.y + theSprites[i].airDistance - camera.y;
 		}
 	}
 }
@@ -512,23 +693,40 @@ function level3Update()
 //#region level4
 function level4Init()
 {
+	backDrops = new Array();
+	backDrops.push( new moveableBackdrop( level4BackGround, 1, new vec2( 0, 0 ), new vec2( -1000, 0 ), new vec2( level4BackGround.getBounds().width, 0 ), false, true ) );
+	backDrops.push( new moveableBackdrop( level4Building, 0.5, new vec2( 0, 0 ), new vec2( -1000, 0 ), new vec2( level4Building.getBounds().width, 0 ), false, true ) );
+	backDrops.push( new moveableBackdrop( level4Train, 1, new vec2( 0, gameEngine.CANVASHEIGHT - level4Train.getBounds().height - 50 ), new vec2( 0, 0 ), new vec2( level4Train.getBounds().width, 0 ), false, true ) );
+	for (var i = 0; i < backDrops.length; i++ )
+	{
+		for (var j = 0; j < backDrops[i].array.length; j++ )
+		{
+			gameEngine.stage.addChild( backDrops[i].array[j] );
+		}
+	}
+
 	spriteArray = new Array();
-	player = new moveableAttacker(new moveableObject( jamieChara.clone(), new vec2( 10, 100 ), 300 ), new shortRangeAttack(0,0,100,10));
+	player = new moveableAttacker(new moveableObject( jamieChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack(0,0,100,10));
 	spriteArray.push( player.moveable );
 	gameEngine.stage.addChild( player.moveable.sprite );
 	enemies = new Array();
-	for(i = 0; i < 5; i++)
+	for( var i = 0; i < 5; i++)
 	{
 		enemies.push( new moveableAttacker(new moveableObject( level4Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( 100 * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack(0,0,10,10 )));
 		spriteArray.push( enemies[i].moveable );
 		gameEngine.stage.addChild( enemies[i].moveable.sprite );
 	}
-	stageBounds = new cage( gameEngine.CANVASHEIGHT / 2, gameEngine.CANVASHEIGHT, 0, 10000 );
+	
+	stageBounds = new cage( gameEngine.CANVASHEIGHT - 75, gameEngine.CANVASHEIGHT - 50, 0, 10000 );
+	cameraBounds = new cage( 0, gameEngine.CANVASHEIGHT - 100, 0, 10000 );
+	camera = new vec2( 0, 0 );
+	jumpable = true;
 }
 
 function level4Delete()
 {
 	gameEngine.stage.removeAllChildren();
+	backDrops = spriteArray = enemies = stageBounds = null;
 }
 
 function level4Update()
