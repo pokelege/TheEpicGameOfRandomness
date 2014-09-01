@@ -101,11 +101,13 @@ function gameoverLoaded()
 function gameoverInit()
 {
 	gameEngine.stage.addChild( gameover );
+	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "title"; } );
 }
 
 function gameoverDelete()
 {
 	gameEngine.stage.removeAllChildren();
+	gameEngine.stage.removeAllEventListeners();
 }
 function gameoverUpdate()
 {
@@ -144,14 +146,15 @@ function characterSelectUpdate()
 //#endregion
 
 
-//#region mainGame
+//#region mainGame powerStar
 var mainGameManifest =
 	[
 		{ src: "images/jamieChara.png", id: "jamieChara" },
 		{ src: "images/fpsBar.png", id: "healthBar" },
+		{ src: "images/powerStar.png", id: "powerStar" },
 		{ src: "images/pixel.png", id: "pixel" }
 	];
-var mainGameQueue, jamieChara, pixel, healthBar;
+var mainGameQueue, jamieChara, pixel, healthBar, powerStar;
 
 var Level1Manifest =
 	[
@@ -174,11 +177,12 @@ var Level3Queue;
 var Level4Manifest =
 	[
 		{ src: "images/enemy.png", id: "enemy" },
+		{ src: "images/enemy.png", id: "boss" },
 		{ src: "images/level4Building.png", id: "level4Building" },
 		{ src: "images/level4BackGround.png", id: "level4BackGround" },
 		{ src: "images/level4Train.png", id: "level4Train" },
 	];
-var Level4Queue, level4Enemy, level4Building, level4BackGround, level4Train;
+var Level4Queue, level4Enemy, level4Boss, level4Building, level4BackGround, level4Train;
 
 var Level5Manifest =
 	[
@@ -235,6 +239,8 @@ function mainGameLoaded()
 	healthBar.scaleY = 0.1;
 	healthBar.regY = 100 * 0.1 * 0.5;
 
+	powerStar = new createjs.Bitmap( mainGameQueue.getResult( "powerStar" ) );
+
 	pixel = new createjs.Bitmap( mainGameQueue.getResult( "pixel" ) );
 }
 
@@ -275,7 +281,29 @@ function level4Loaded()
 	level4Enemy = new createjs.Sprite( enemySheet, "Neutral" );
 	level4Enemy.scaleX = 0.75;
 	level4Enemy.scaleY = 0.75;
-	level4Enemy.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
+
+	var enemySheet2 = new createjs.SpriteSheet
+	(
+	{
+		images: [Level4Queue[0].getResult( "boss" )],
+		frames:
+			{
+				regX: 367 / 2,
+				regY: 311 * 0.80,
+				width: 367,
+				height: 311
+			},
+		animations:
+			{
+				Neutral: [0, 0],
+				Die: [1, 9, false]
+			}
+	}
+	);
+	level4Boss = new createjs.Sprite( enemySheet2, "Neutral" );
+	level4Boss.scaleX = 1.5;
+	level4Boss.scaleY = 1.5;
+	level4Boss.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
 
 	level4Building = new createjs.Bitmap( Level4Queue[0].getResult( "level4Building" ) );
 	level4BackGround = new createjs.Bitmap( Level4Queue[0].getResult( "level4BackGround" ) );
@@ -299,6 +327,10 @@ function vec2(x, y)
 			return new vec2( 0, 0 );
 		}
 		else return new vec2( this.x / magnitude, this.y / magnitude );
+	}
+	this.length = function()
+	{
+		return Math.sqrt(( this.x * this.x ) + ( this.y * this.y ) );
 	}
 	this.add = function(addWith)
 	{
@@ -336,15 +368,31 @@ function shortRangeAttack(x, y, width, height)
 	this.y = y;
 	this.width = width;
 	this.height = height;
-
-	this.collideSprite = function(theSpriteFrom, theSpriteTo)
+	this.debugSprite = null;
+	this.updateDebugSprite = function ( theSpriteFrom )
 	{
-		var pixelTest = pixel;
+		var pixelTest = this.debugSprite;
 		pixelTest.x = this.x + theSpriteFrom.x;
 		pixelTest.y = this.y + theSpriteFrom.y;
 		pixelTest.scaleX = this.width;
 		pixelTest.scaleY = this.height;
-		return ndgmr.checkPixelCollision( pixelTest, theSpriteTo, 0 );
+	}
+
+	this.collideSprite = function(theSpriteFrom, theSpriteTo)
+	{
+		if ( this.debugSprite )
+		{
+			return ndgmr.checkPixelCollision( this.debugSprite, theSpriteTo, 0 );
+		}
+		else
+		{
+			var pixelTest = pixel.clone();
+			pixelTest.x = this.x + theSpriteFrom.x;
+			pixelTest.y = this.y + theSpriteFrom.y;
+			pixelTest.scaleX = this.width;
+			pixelTest.scaleY = this.height;
+			return ndgmr.checkPixelCollision( pixelTest, theSpriteTo, 0 );
+		}
 	}
 }
 
@@ -618,17 +666,18 @@ function playerMovement()
 			player.moveable.sprite.gotoAndPlay("Run");
 		}
 		player.moveable.position = player.moveable.position.add( posToAdd );
-		stageBounds.contain( player.moveable );
 	}
-
+	stageBounds.contain( player.moveable );
 	if ( gameEngine.ZPressed || gameEngine.IPressed || gameEngine.XPressed || gameEngine.OPressed )
 	{
+		player.attacker.updateDebugSprite( player.moveable.sprite );
+		player.attacker.debugSprite.visible = true;
 		for ( var i = 0; i < enemies.length; i++ )
 		{
 			if ( enemies[i].moveable.sprite.visible && enemies[i].moveable.sprite.currentAnimation != "Die" )
 			{
 				var collided = player.attacker.collideSprite( player.moveable.sprite, enemies[i].moveable.sprite );
-				pixel.visible = true;
+				
 				if ( collided )
 				{
 					enemies[i].moveable.sprite.gotoAndPlay( "Die" );
@@ -636,21 +685,81 @@ function playerMovement()
 			}
 		}
 	}
-	else pixel.visible = false;
+	else player.attacker.debugSprite.visible = false;
+
+	for(var i = 0;i < powerStars.length;i++)
+	{
+		if(powerStars[i].sprite.visible)
+		{
+			if(ndgmr.checkRectCollision(player.moveable.sprite, powerStars[i].sprite))
+			{
+				powerStars[i].sprite.visible = false;
+				invisibleTimeLeft = INVISIBLETIME;
+			}
+		}
+	}
+
 }
 
 function enemyMovement()
 {
 	for(var i = 0; i < enemies.length; i++)
 	{
-		if ( enemies[i].moveable.sprite.visible )
+		if ( enemies[i].moveable.sprite.visible && enemies[i].moveable.sprite.currentAnimation != "Die" )
 		{
-			enemies[i].moveable.position = enemies[i].moveable.position.add( player.moveable.position.subtract( enemies[i].moveable.position ).normalize().multiply( enemies[i].moveable.velocity ) );
-			stageBounds.contain( enemies[i].moveable );
-			if ( ndgmr.checkPixelCollision( enemies[i].moveable.sprite, player.moveable.sprite, 0 ) )
+			var distance = enemies[i].moveable.position.subtract( player.moveable.position ).length()
+			if ( distance > 175 && distance < gameEngine.CANVASWIDTH * 1.25 )
 			{
-				life -= 0.1;
+				enemies[i].attacker.debugSprite.visible = false;
+				var posToAdd = player.moveable.position.subtract( enemies[i].moveable.position ).normalize().multiply( enemies[i].moveable.velocity );
+				enemies[i].moveable.position = enemies[i].moveable.position.add( posToAdd );
+
+				if ( posToAdd.equals( new vec2( 0, 0 ) ) )
+				{
+				}
+				else
+				{
+					if ( posToAdd.x > 0 )
+					{
+						if ( enemies[i].moveable.sprite.scaleX < 0 )
+						{
+							enemies[i].moveable.sprite.scaleX *= -1;
+						}
+						if ( enemies[i].attacker.x < 0 || enemies[i].attacker.width < 0 )
+						{
+							enemies[i].attacker.x *= -1;
+							enemies[i].attacker.width *= -1;
+						}
+					}
+					else if ( posToAdd.x < 0 )
+					{
+						if ( enemies[i].moveable.sprite.scaleX > 0 )
+						{
+							enemies[i].moveable.sprite.scaleX *= -1;
+						}
+						if ( enemies[i].attacker.x > 0 || enemies[i].attacker.width > 0 )
+						{
+							enemies[i].attacker.x *= -1;
+							enemies[i].attacker.width *= -1;
+						}
+					}
+				}
+
+				stageBounds.contain( enemies[i].moveable );
 			}
+			else
+			{
+				enemies[i].attacker.debugSprite.visible = true;
+				enemies[i].attacker.updateDebugSprite( enemies[i].moveable.sprite );
+				if ( invisibleTimeLeft <= 0 && enemies[i].attacker.collideSprite( enemies[i].moveable.sprite, player.moveable.sprite ) )
+				{
+					life -= 0.25;
+				}
+			}
+		}
+		else
+		{
+			enemies[i].attacker.debugSprite.visible = false;
 		}
 	}
 }
@@ -658,21 +767,21 @@ function enemyMovement()
 function cameraFollowPlayer()
 {
 	var oldCamera = new vec2( camera.x, camera.y );
-	if(player.moveable.sprite.x < gameEngine.CANVASWIDTH * 0.1)
+	if(player.moveable.sprite.x < gameEngine.CANVASWIDTH * 0.25)
 	{
-		camera.x += player.moveable.sprite.x - (gameEngine.CANVASWIDTH * 0.1)
+		camera.x += player.moveable.sprite.x - (gameEngine.CANVASWIDTH * 0.25)
 	}
-	if ( player.moveable.sprite.x > gameEngine.CANVASWIDTH * 0.9 )
+	if ( player.moveable.sprite.x > gameEngine.CANVASWIDTH * 0.75 )
 	{
-		camera.x += player.moveable.sprite.x - ( gameEngine.CANVASWIDTH * 0.9 )
+		camera.x += player.moveable.sprite.x - ( gameEngine.CANVASWIDTH * 0.75 )
 	}
-	if ( player.moveable.sprite.y < gameEngine.CANVASHEIGHT * 0.1 )
+	if ( player.moveable.sprite.y < gameEngine.CANVASHEIGHT * 0.25 )
 	{
-		camera.y += player.moveable.sprite.y - ( gameEngine.CANVASHEIGHT * 0.1 )
+		camera.y += player.moveable.sprite.y - ( gameEngine.CANVASHEIGHT * 0.25 )
 	}
-	if ( player.moveable.sprite.y > gameEngine.CANVASHEIGHT * 0.9 )
+	if ( player.moveable.sprite.y > gameEngine.CANVASHEIGHT * 0.75 )
 	{
-		camera.y += player.moveable.sprite.y - ( gameEngine.CANVASHEIGHT * 0.9 )
+		camera.y += player.moveable.sprite.y - ( gameEngine.CANVASHEIGHT * 0.75 )
 	}
 	cameraBounds.containCamera( camera );
 	for ( var i = 0; i < backDrops.length; i++ )
@@ -694,10 +803,10 @@ function moveableObjectsUpdate(theSprites)
 }
 
 var lastLife;
-var lifeMoveSpeed = 0.5;
+var lifeMoveSpeed = 1;
 function updateLife()
 {
-	lastLife += ( life - lastLife ) * ( gameEngine.DT ) * lifeMoveSpeed;
+	lastLife += ( life - lastLife ) * lifeMoveSpeed;
 	healthBar.scaleX = lastLife / 50;
 	if ( life < 25 && ( healthBar.currentAnimation == "Good" || healthBar.currentAnimation == "ToGood" ) )
 	{
@@ -707,6 +816,16 @@ function updateLife()
 	{
 		healthBar.gotoAndPlay( "ToGood" );
 	}
+}
+
+var invisibleTimeLeft;
+var INVISIBLETIME = 5;
+
+function invisibilityUpdate()
+{
+	if ( invisibleTimeLeft > 0 ) invisibleTimeLeft -= gameEngine.DT;
+	if ( invisibleTimeLeft < 0 ) invisibleTimeLeft = 0;
+	player.moveable.sprite.alpha = 1 - ( ( invisibleTimeLeft / INVISIBLETIME ) * 0.5 );
 }
 
 //#region level1
@@ -776,24 +895,42 @@ function level4Init()
 	}
 
 	spriteArray = new Array();
-	player = new moveableAttacker(new moveableObject( jamieChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack(jamieChara.getTransformedBounds().width / 2, - jamieChara.getTransformedBounds().height / 2,100,10));
-	spriteArray.push( player.moveable );
-	gameEngine.stage.addChild( player.moveable.sprite );
 	enemies = new Array();
-	for( var i = 0; i < 5; i++)
+	for( var i = 0; i < 100; i++)
 	{
-		enemies.push( new moveableAttacker(new moveableObject( level4Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( 100 * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack(0,0,10,10 )));
+		enemies.push( new moveableAttacker( new moveableObject( level4Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( 10000 - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level4Enemy.getTransformedBounds().width / 4, -level4Enemy.getTransformedBounds().height / 4, 100, 20 ) ) );
+		enemies[i].attacker.debugSprite = pixel.clone();
+		enemies[i].attacker.debugSprite.visible = true;
+		enemies[i].moveable.sprite.on( "animationend",
+		function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; }
+		);
 		spriteArray.push( enemies[i].moveable );
 		gameEngine.stage.addChild( enemies[i].moveable.sprite );
+		gameEngine.stage.addChild( enemies[i].attacker.debugSprite );
 	}
 	
 	stageBounds = new cage( gameEngine.CANVASHEIGHT - 75, gameEngine.CANVASHEIGHT - 50, 0, 10000 );
 	cameraBounds = new cage( 0, gameEngine.CANVASHEIGHT - 100, 0, 10000 );
 	camera = new vec2( 0, 0 );
-	gameEngine.stage.addChild( pixel );
+	player = new moveableAttacker( new moveableObject( jamieChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack( jamieChara.getTransformedBounds().width / 4, -jamieChara.getTransformedBounds().height / 2, 45, 10 ) );
+	player.attacker.debugSprite = pixel.clone();
+	spriteArray.push( player.moveable );
+	gameEngine.stage.addChild( player.moveable.sprite );
+	gameEngine.stage.addChild( player.attacker.debugSprite );
+
+	powerStars = new Array();
+	for ( var i = 0; i < 10; i++ )
+	{
+		powerStars.push( new moveableObject( powerStar.clone(), new vec2(( Math.random() * 7500 ) + gameEngine.CANVASWIDTH, 0 ) ) );
+		spriteArray.push( powerStars[i] );
+		stageBounds.contain( powerStars[i] );
+		gameEngine.stage.addChild( powerStars[i].sprite );
+	}
+
 	jumpable = true;
 	life = 100;
 	lastLife = life;
+	invisibleTimeLeft = 0;
 	gameEngine.stage.addChild( healthBar );
 }
 
@@ -811,6 +948,8 @@ function level4Update()
 	cameraFollowPlayer();
 	moveableObjectsUpdate( spriteArray );
 	updateLife();
+	invisibilityUpdate();
+	if ( life <= 0 ) gameEngine.mode = "gameover";
 }
 //#endregion
 
@@ -901,5 +1040,5 @@ function andrewMain()
 	Level5Queue[0].on( "complete", level5Loaded );
 	Level5Queue[0].loadManifest( Level5Manifest );
 	Level5Queue.push( mainGameQueue );
-	gameEngine.addModeLooper( "level1", new gameEngine.updateModeLooper( level5Init, level5Delete, level5Update, Level5Queue ) );
+	gameEngine.addModeLooper( "level5", new gameEngine.updateModeLooper( level5Init, level5Delete, level5Update, Level5Queue ) );
 }
