@@ -230,9 +230,10 @@ var mainGameManifest =
 		{ src: "images/jamieChara.png", id: "jamieChara" },
 		{ src: "images/fpsBar.png", id: "healthBar" },
 		{ src: "images/powerStar.png", id: "powerStar" },
+		{ src: "images/easterEgg.png", id: "easterEgg" },
 		{ src: "images/pixel.png", id: "pixel" }
 	];
-var mainGameQueue, jamieChara, pixel, healthBar, powerStar;
+var mainGameQueue, jamieChara, pixel, healthBar, powerStar, easterEgg;
 
 var Level1Manifest =
 	[
@@ -318,7 +319,7 @@ function mainGameLoaded()
 	healthBar.regY = 100 * 0.1 * 0.5;
 
 	powerStar = new createjs.Bitmap( mainGameQueue.getResult( "powerStar" ) );
-
+	easterEgg = new createjs.Bitmap( mainGameQueue.getResult( "easterEgg" ) );
 	pixel = new createjs.Bitmap( mainGameQueue.getResult( "pixel" ) );
 }
 
@@ -798,6 +799,17 @@ function playerMovement()
 		}
 	}
 
+	for ( var i = 0; i < easterEggs.length; i++ )
+	{
+		if ( easterEggs[i].sprite.visible )
+		{
+			if ( ndgmr.checkRectCollision( player.moveable.sprite, easterEggs[i].sprite ) )
+			{
+				easterEggs[i].sprite.visible = false;
+			}
+		}
+	}
+
 }
 
 function enemyMovement()
@@ -1118,6 +1130,15 @@ function level4Init()
 		spriteArray.push( powerStars[i] );
 		stageBounds.contain( powerStars[i] );
 		gameEngine.stage.addChild( powerStars[i].sprite );
+	}
+
+	easterEggs = new Array();
+	for ( var i = 0; i < 2; i++ )
+	{
+		easterEggs.push( new moveableObject( easterEgg.clone(), new vec2(( Math.random() * 7500 ) + gameEngine.CANVASWIDTH, 0 ) ) );
+		spriteArray.push( easterEggs[easterEggs.length - 1] );
+		stageBounds.contain( easterEggs[easterEggs.length - 1] );
+		gameEngine.stage.addChild( easterEggs[easterEggs.length - 1].sprite )
 	}
 
 	jumpable = true;
