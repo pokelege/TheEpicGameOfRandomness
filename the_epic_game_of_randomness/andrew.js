@@ -289,7 +289,7 @@ function level4Loaded()
 		frames:
 			{
 				regX: 367 / 2,
-				regY: 311 * 0.80,
+				regY: 311 * 0.20,
 				width: 367,
 				height: 311
 			},
@@ -303,7 +303,7 @@ function level4Loaded()
 	level4Boss = new createjs.Sprite( enemySheet2, "Neutral" );
 	level4Boss.scaleX = 1.5;
 	level4Boss.scaleY = -1.5;
-	level4Boss.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
+	//level4Boss.regY = level4Boss.getTransformedBounds().width;
 
 	level4Building = new createjs.Bitmap( Level4Queue[0].getResult( "level4Building" ) );
 	level4BackGround = new createjs.Bitmap( Level4Queue[0].getResult( "level4BackGround" ) );
@@ -687,6 +687,16 @@ function playerMovement()
 				}
 			}
 		}
+
+		if ( boss.moveable.sprite.visible && boss.moveable.sprite.currentAnimation != "Die" )
+		{
+			var collided = player.attacker.collideSprite( player.moveable.sprite, boss.moveable.sprite );
+
+			if ( collided )
+			{
+				bosslife -= 0.5;
+			}
+		}
 	}
 	else player.attacker.debugSprite.visible = false;
 
@@ -767,6 +777,66 @@ function enemyMovement()
 	}
 }
 
+function bossUpdate()
+{
+		if ( boss.moveable.sprite.visible && boss.moveable.sprite.currentAnimation != "Die" )
+		{
+			var distance = boss.moveable.position.subtract( player.moveable.position ).length()
+			if ( distance > 175 && distance < gameEngine.CANVASWIDTH * 1.25 )
+			{
+				boss.attacker.debugSprite.visible = false;
+				var posToAdd = player.moveable.position.subtract( boss.moveable.position ).normalize().multiply( boss.moveable.velocity );
+				boss.moveable.position = boss.moveable.position.add( posToAdd );
+
+				if ( posToAdd.equals( new vec2( 0, 0 ) ) )
+				{
+				}
+				else
+				{
+					if ( posToAdd.x > 0 )
+					{
+						if ( boss.moveable.sprite.scaleX < 0 )
+						{
+							boss.moveable.sprite.scaleX *= -1;
+						}
+						if ( boss.attacker.x < 0 || boss.attacker.width < 0 )
+						{
+							boss.attacker.x *= -1;
+							boss.attacker.width *= -1;
+						}
+					}
+					else if ( posToAdd.x < 0 )
+					{
+						if ( boss.moveable.sprite.scaleX > 0 )
+						{
+							boss.moveable.sprite.scaleX *= -1;
+						}
+						if ( boss.attacker.x > 0 || boss.attacker.width > 0 )
+						{
+							boss.attacker.x *= -1;
+							boss.attacker.width *= -1;
+						}
+					}
+				}
+
+				stageBounds.contain( boss.moveable );
+			}
+			else
+			{
+				boss.attacker.debugSprite.visible = true;
+				boss.attacker.updateDebugSprite( boss.moveable.sprite );
+				if ( invisibleTimeLeft <= 0 && boss.attacker.collideSprite( boss.moveable.sprite, player.moveable.sprite ) )
+				{
+					life -= 0.5;
+				}
+			}
+		}
+		else
+		{
+			boss.attacker.debugSprite.visible = false;
+		}
+}
+
 function cameraFollowPlayer()
 {
 	var oldCamera = new vec2( camera.x, camera.y );
@@ -822,14 +892,19 @@ function updateLife()
 	}
 
 	lastBossLife += ( bosslife - lastBossLife ) * lifeMoveSpeed;
-	bossHealthBar.scaleX = lastBossLife / 50;
-	if ( life < 25 && ( bossHealthBar.currentAnimation == "Good" || bossHealthBar.currentAnimation == "ToGood" ) )
+	bossHealthBar.scaleX = -(lastBossLife / 50);
+	if ( bosslife < 25 && ( bossHealthBar.currentAnimation == "Good" || bossHealthBar.currentAnimation == "ToGood" ) )
 	{
 		bossHealthBar.gotoAndPlay( "ToBad" );
 	}
 	else if ( bosslife >= 25 && ( bossHealthBar.currentAnimation == "Bad" || bossHealthBar.currentAnimation == "ToBad" ) )
 	{
 		bossHealthBar.gotoAndPlay( "ToGood" );
+	}
+
+	if(bosslife <= 0 && boss.moveable.sprite.currentAnimation != "Die")
+	{
+		boss.moveable.sprite.gotoAndPlay( "Die" );
 	}
 }
 
@@ -912,9 +987,12 @@ function level4Init()
 	spriteArray = new Array();
 
 
-	boss = new moveableAttacker( new moveableObject( level4Boss.clone(), new vec2( 9000, 0 ), new vec2( 0, 0 ) ), new shortRangeAttack( 0, 10, -100, 10 ) );
+	boss = new moveableAttacker( new moveableObject( level4Boss.clone(), new vec2( 9000, 0 ), 10 ), new shortRangeAttack( level4Boss.getTransformedBounds().width / 4, -level4Boss.getTransformedBounds().height / 4, 100, 100 ) );
+	boss.attacker.debugSprite = pixel.clone();
+	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
 	spriteArray.push( boss.moveable );
 	gameEngine.stage.addChild( boss.moveable.sprite );
+	gameEngine.stage.addChild( boss.attacker.debugSprite );
 	enemies = new Array();
 	for( var i = 0; i < 100; i++)
 	{
@@ -928,7 +1006,7 @@ function level4Init()
 		gameEngine.stage.addChild( enemies[i].moveable.sprite );
 		gameEngine.stage.addChild( enemies[i].attacker.debugSprite );
 	}
-	
+
 	stageBounds = new cage( gameEngine.CANVASHEIGHT - 75, gameEngine.CANVASHEIGHT - 50, 0, 10000 );
 	cameraBounds = new cage( 0, gameEngine.CANVASHEIGHT - 100, 0, 10000 );
 	camera = new vec2( 0, 0 );
@@ -956,6 +1034,8 @@ function level4Init()
 	playerHealthBar = healthBar.clone();
 	gameEngine.stage.addChild( playerHealthBar );
 	bossHealthBar = healthBar.clone();
+	bossHealthBar.x = gameEngine.CANVASWIDTH;
+	bossHealthBar.y = gameEngine.CANVASHEIGHT - bossHealthBar.getTransformedBounds().height;
 	gameEngine.stage.addChild( bossHealthBar );
 }
 
@@ -970,11 +1050,13 @@ function level4Update()
 
 	playerMovement();
 	enemyMovement();
+	bossUpdate();
 	cameraFollowPlayer();
 	moveableObjectsUpdate( spriteArray );
 	updateLife();
 	invisibilityUpdate();
 	if ( life <= 0 ) gameEngine.mode = "gameover";
+	if ( !boss.moveable.sprite.visible ) gameEngine.mode = "credits";
 }
 //#endregion
 
