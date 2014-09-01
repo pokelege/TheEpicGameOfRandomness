@@ -3,9 +3,11 @@ var titleManifest =
 [
 	{ src: "images/title.jpg", id: "title" },
 	{ src: "images/playButton.png", id: "playButton" },
+	{ src: "images/instructionsButton.png", id: "instructionsButton" },
+	{ src: "images/creditsButton.png", id: "creditsButton" },
 ];
 var titleQueue;
-var titleScreen, playButton;
+var titleScreen, playButton, instructionsButton, creditsButton;
 function titleLoaded()
 {
 	titleScreen = new createjs.Bitmap( titleQueue[0].getResult( "title" ) );
@@ -15,12 +17,26 @@ function titleLoaded()
 	playButton.regY = playButton.getBounds().height / 2;
 	playButton.x = gameEngine.CANVASWIDTH / 2;
 	playButton.y = gameEngine.CANVASHEIGHT / 2;
+
+	instructionsButton = new createjs.Bitmap( titleQueue[0].getResult( "instructionsButton" ) );
+	instructionsButton.on( "click", function ( evt ) { gameEngine.mode = "instructions"; } );
+	instructionsButton.regX = instructionsButton.getBounds().width / 2;
+	instructionsButton.x = gameEngine.CANVASWIDTH / 2;
+	instructionsButton.y = playButton.getTransformedBounds().height + playButton.y + 5;
+
+	creditsButton = new createjs.Bitmap( titleQueue[0].getResult( "creditsButton" ) );
+	creditsButton.on( "click", function ( evt ) { gameEngine.mode = "credits"; } );
+	creditsButton.regX = creditsButton.getBounds().width / 2;
+	creditsButton.x = gameEngine.CANVASWIDTH / 2;
+	creditsButton.y = instructionsButton.getTransformedBounds().height + instructionsButton.y + 5;
 }
 
 function titleInit()
 {
 	gameEngine.stage.addChild( titleScreen );
 	gameEngine.stage.addChild( playButton );
+	gameEngine.stage.addChild( instructionsButton );
+	gameEngine.stage.addChild( creditsButton );
 }
 function titleDelete()
 {
@@ -47,10 +63,12 @@ function instructionsLoaded()
 function instructionsInit()
 {
 	gameEngine.stage.addChild( instructions );
+	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "title"; } );
 }
 
 function instructionsDelete()
 {
+	gameEngine.stage.removeAllChildren();
 	gameEngine.stage.removeAllChildren();
 }
 function instructionsUpdate()
@@ -74,11 +92,13 @@ function creditsLoaded()
 function creditsInit()
 {
 	gameEngine.stage.addChild( credits );
+	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "title"; } );
 }
 
 function creditsDelete()
 {
 	gameEngine.stage.removeAllChildren();
+	gameEngine.stage.removeAllEventListeners();
 }
 function creditsUpdate()
 {
@@ -110,6 +130,64 @@ function gameoverDelete()
 	gameEngine.stage.removeAllEventListeners();
 }
 function gameoverUpdate()
+{
+
+}
+//#endregion
+
+//#region win
+var winManifest =
+	[
+		{ src: "images/win.jpg", id: "win" }
+	];
+var winQueue;
+var win;
+function winLoaded()
+{
+	win = new createjs.Bitmap( winQueue[0].getResult( "win" ) );
+}
+
+function winInit()
+{
+	gameEngine.stage.addChild( win );
+	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "title"; } );
+}
+
+function winDelete()
+{
+	gameEngine.stage.removeAllChildren();
+	gameEngine.stage.removeAllEventListeners();
+}
+function winUpdate()
+{
+
+}
+//#endregion
+
+//#region trueWin
+var trueWinManifest =
+	[
+		{ src: "images/trueWin.jpg", id: "trueWin" }
+	];
+var trueWinQueue;
+var trueWin;
+function trueWinLoaded()
+{
+	trueWin = new createjs.Bitmap( trueWinQueue[0].getResult( "trueWin" ) );
+}
+
+function trueWinInit()
+{
+	gameEngine.stage.addChild( trueWin );
+	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "title"; } );
+}
+
+function trueWinDelete()
+{
+	gameEngine.stage.removeAllChildren();
+	gameEngine.stage.removeAllEventListeners();
+}
+function trueWinUpdate()
 {
 
 }
@@ -567,6 +645,8 @@ function moveableBackdrop(sprite, depth, initialPosition, velocity, seperation, 
 	}
 }
 
+var easterEggs;
+
 var player;
 var playerHealthBar;
 var enemies;
@@ -700,6 +780,11 @@ function playerMovement()
 		}
 	}
 	else player.attacker.debugSprite.visible = false;
+
+	if ( gameEngine.JamiePressed || gameEngine.TomPressed )
+	{
+		invisibleTimeLeft = INVISIBLETIME;
+	}
 
 	for(var i = 0;i < powerStars.length;i++)
 	{
@@ -916,7 +1001,7 @@ function updateLife()
 }
 
 var invisibleTimeLeft;
-var INVISIBLETIME = 5;
+var INVISIBLETIME = 3;
 
 function invisibilityUpdate()
 {
@@ -1027,7 +1112,7 @@ function level4Init()
 	gameEngine.stage.addChild( player.attacker.debugSprite );
 
 	powerStars = new Array();
-	for ( var i = 0; i < 10; i++ )
+	for ( var i = 0; i < 4; i++ )
 	{
 		powerStars.push( new moveableObject( powerStar.clone(), new vec2(( Math.random() * 7500 ) + gameEngine.CANVASWIDTH, 0 ) ) );
 		spriteArray.push( powerStars[i] );
@@ -1079,7 +1164,22 @@ function level4Update()
 	scoreDisplay.text = score;
 	scoreDisplay.x = gameEngine.CANVASWIDTH - scoreDisplay.getMeasuredWidth();
 	if ( life <= 0 ) gameEngine.mode = "gameover";
-	if ( !boss.moveable.sprite.visible ) gameEngine.mode = "credits";
+	if ( !boss.moveable.sprite.visible )
+	{
+		var gotAllEggs = true;
+		for ( var i = 0; i < easterEggs.length; i++ )
+		{
+			if(easterEggs.sprite.visible)
+			{
+				gotAllEggs = false;
+			}
+		}
+		if ( gotAllEggs )
+		{
+			gameEngine.mode = "trueWin";
+		}
+		else gameEngine.mode = "win";
+	}
 }
 //#endregion
 
@@ -1126,6 +1226,18 @@ function andrewMain()
 	gameoverQueue[0].on( "complete", gameoverLoaded, this );
 	gameoverQueue[0].loadManifest( gameoverManifest );
 	gameEngine.addModeLooper( "gameover", new gameEngine.updateModeLooper( gameoverInit, gameoverDelete, gameoverUpdate, gameoverQueue ) );
+
+	winQueue = new Array();
+	winQueue.push( new createjs.LoadQueue( true, "assets/" ) );
+	winQueue[0].on( "complete", winLoaded, this );
+	winQueue[0].loadManifest( winManifest );
+	gameEngine.addModeLooper( "win", new gameEngine.updateModeLooper( winInit, winDelete, winUpdate, winQueue ) );
+
+	trueWinQueue = new Array();
+	trueWinQueue.push( new createjs.LoadQueue( true, "assets/" ) );
+	trueWinQueue[0].on( "complete", trueWinLoaded, this );
+	trueWinQueue[0].loadManifest( trueWinManifest );
+	gameEngine.addModeLooper( "trueWin", new gameEngine.updateModeLooper( trueWinInit, trueWinDelete, trueWinUpdate, trueWinQueue ) );
 
 	characterSelectQueue = new Array();
 	characterSelectQueue.push(new createjs.LoadQueue( true, "assets/" ));
