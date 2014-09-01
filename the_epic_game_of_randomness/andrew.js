@@ -683,6 +683,7 @@ function playerMovement()
 				
 				if ( collided )
 				{
+					score += 100;
 					enemies[i].moveable.sprite.gotoAndPlay( "Die" );
 				}
 			}
@@ -891,6 +892,11 @@ function updateLife()
 		playerHealthBar.gotoAndPlay( "ToGood" );
 	}
 
+	var distance = boss.moveable.position.subtract( player.moveable.position ).length()
+	if ( distance < gameEngine.CANVASWIDTH * 1.25 ) bossHealthBar.visible = true;
+	else bossHealthBar.visible = false;
+
+
 	lastBossLife += ( bosslife - lastBossLife ) * lifeMoveSpeed;
 	bossHealthBar.scaleX = -(lastBossLife / 50);
 	if ( bosslife < 25 && ( bossHealthBar.currentAnimation == "Good" || bossHealthBar.currentAnimation == "ToGood" ) )
@@ -904,6 +910,7 @@ function updateLife()
 
 	if(bosslife <= 0 && boss.moveable.sprite.currentAnimation != "Die")
 	{
+		score += 9001;
 		boss.moveable.sprite.gotoAndPlay( "Die" );
 	}
 }
@@ -918,6 +925,9 @@ function invisibilityUpdate()
 	player.moveable.sprite.alpha = 1 - ( ( invisibleTimeLeft / INVISIBLETIME ) * 0.5 );
 }
 
+
+var score;
+var scoreDisplay;
 //#region level1
 function level1Init()
 {
@@ -1037,6 +1047,17 @@ function level4Init()
 	bossHealthBar.x = gameEngine.CANVASWIDTH;
 	bossHealthBar.y = gameEngine.CANVASHEIGHT - bossHealthBar.getTransformedBounds().height;
 	gameEngine.stage.addChild( bossHealthBar );
+	score = 0;
+
+	var scoreText = new createjs.Text( "Score", "16px Comic Sans MS", "#000" );
+	scoreText.regX = scoreText.getMeasuredWidth();
+	scoreText.x = gameEngine.CANVASWIDTH;
+
+	scoreDisplay = new createjs.Text( score, "16px Comic Sans MS", "#000" );
+	scoreDisplay.x = gameEngine.CANVASWIDTH - scoreDisplay.getMeasuredWidth();
+	scoreDisplay.y = scoreText.getMeasuredHeight();
+	gameEngine.stage.addChild( scoreText );
+	gameEngine.stage.addChild( scoreDisplay );
 }
 
 function level4Delete()
@@ -1055,6 +1076,8 @@ function level4Update()
 	moveableObjectsUpdate( spriteArray );
 	updateLife();
 	invisibilityUpdate();
+	scoreDisplay.text = score;
+	scoreDisplay.x = gameEngine.CANVASWIDTH - scoreDisplay.getMeasuredWidth();
 	if ( life <= 0 ) gameEngine.mode = "gameover";
 	if ( !boss.moveable.sprite.visible ) gameEngine.mode = "credits";
 }
