@@ -1,3 +1,9 @@
+function modeStruct(title, data)
+{
+	this.title = title;
+	this.data = data;
+}
+
 //The engine nameSpace
 var gameEngine =
 {
@@ -55,21 +61,19 @@ var gameEngine =
 	},
 
 	//add your updateModeLoopers to this map
-	updateModeLooperArray: new Map(),
-	updateModeLooperKeys: new Array(),
+	updateModeLooperArray: new Array(),
 	addModeLooper: function(key, theUpdateModeLooper)
 	{
-		gameEngine.updateModeLooperKeys.push( key );
-		gameEngine.updateModeLooperArray.set( key, theUpdateModeLooper );
+		gameEngine.updateModeLooperArray.push( new modeStruct( key, theUpdateModeLooper) );
 	},
 
 	//call this to delete all stages based on your deleter
 	removeAll: function()
 	{
-		for ( i = 0; i < gameEngine.updateModeLooperKeys.length; i++ )
+		for ( i = 0; i < gameEngine.updateModeLooperArray.length; i++ )
 		{
-			gameEngine.updateModeLooperArray.get( gameEngine.updateModeLooperKeys[i] ).deleter();
-			gameEngine.updateModeLooperArray.get( gameEngine.updateModeLooperKeys[i] ).initialized = false;
+			gameEngine.updateModeLooperArray[i].data.deleter();
+			gameEngine.updateModeLooperArray[i].data.initialized = false;
 		}
 		if ( gameEngine.loadingInitialized )
 		{
@@ -145,7 +149,14 @@ var gameEngine =
 	//the loop, don't touch
 	loop: function()
 	{
-		if ( gameEngine.updateModeLooperArray.get(gameEngine.mode) != null ) gameEngine.updateModeLooperArray.get(gameEngine.mode).update();
+		for ( var i = 0; i < gameEngine.updateModeLooperArray.length; i++ )
+		{
+			if(gameEngine.updateModeLooperArray[i].title == gameEngine.mode)
+			{
+				gameEngine.updateModeLooperArray[i].data.update();
+				break;
+			}
+		}
 		gameEngine.stage.update();
 	},
 

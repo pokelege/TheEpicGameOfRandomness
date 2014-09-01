@@ -302,7 +302,7 @@ function level4Loaded()
 	);
 	level4Boss = new createjs.Sprite( enemySheet2, "Neutral" );
 	level4Boss.scaleX = 1.5;
-	level4Boss.scaleY = 1.5;
+	level4Boss.scaleY = -1.5;
 	level4Boss.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
 
 	level4Building = new createjs.Bitmap( Level4Queue[0].getResult( "level4Building" ) );
@@ -568,14 +568,17 @@ function moveableBackdrop(sprite, depth, initialPosition, velocity, seperation, 
 }
 
 var player;
+var playerHealthBar;
 var enemies;
 var powerStars;
 var boss;
+var bossHealthBar;
 var spriteArray;
 var stageBounds;
 var cameraBounds;
 var backDrops;
 var life;
+var bosslife;
 var MAXLIFE = 100;
 
 var jumpable;
@@ -803,18 +806,30 @@ function moveableObjectsUpdate(theSprites)
 }
 
 var lastLife;
+var lastBossLife;
 var lifeMoveSpeed = 1;
 function updateLife()
 {
 	lastLife += ( life - lastLife ) * lifeMoveSpeed;
-	healthBar.scaleX = lastLife / 50;
-	if ( life < 25 && ( healthBar.currentAnimation == "Good" || healthBar.currentAnimation == "ToGood" ) )
+	playerHealthBar.scaleX = lastLife / 50;
+	if ( life < 25 && ( playerHealthBar.currentAnimation == "Good" || playerHealthBar.currentAnimation == "ToGood" ) )
 	{
-		healthBar.gotoAndPlay( "ToBad" );
+		playerHealthBar.gotoAndPlay( "ToBad" );
 	}
-	else if ( life >= 25 && ( healthBar.currentAnimation == "Bad" || healthBar.currentAnimation == "ToBad" ) )
+	else if ( life >= 25 && ( playerHealthBar.currentAnimation == "Bad" || playerHealthBar.currentAnimation == "ToBad" ) )
 	{
-		healthBar.gotoAndPlay( "ToGood" );
+		playerHealthBar.gotoAndPlay( "ToGood" );
+	}
+
+	lastBossLife += ( bosslife - lastBossLife ) * lifeMoveSpeed;
+	bossHealthBar.scaleX = lastBossLife / 50;
+	if ( life < 25 && ( bossHealthBar.currentAnimation == "Good" || bossHealthBar.currentAnimation == "ToGood" ) )
+	{
+		bossHealthBar.gotoAndPlay( "ToBad" );
+	}
+	else if ( bosslife >= 25 && ( bossHealthBar.currentAnimation == "Bad" || bossHealthBar.currentAnimation == "ToBad" ) )
+	{
+		bossHealthBar.gotoAndPlay( "ToGood" );
 	}
 }
 
@@ -895,6 +910,11 @@ function level4Init()
 	}
 
 	spriteArray = new Array();
+
+
+	boss = new moveableAttacker( new moveableObject( level4Boss.clone(), new vec2( 9000, 0 ), new vec2( 0, 0 ) ), new shortRangeAttack( 0, 10, -100, 10 ) );
+	spriteArray.push( boss.moveable );
+	gameEngine.stage.addChild( boss.moveable.sprite );
 	enemies = new Array();
 	for( var i = 0; i < 100; i++)
 	{
@@ -930,8 +950,13 @@ function level4Init()
 	jumpable = true;
 	life = 100;
 	lastLife = life;
+	bosslife = 50;
+	lastBossLife = bosslife;
 	invisibleTimeLeft = 0;
-	gameEngine.stage.addChild( healthBar );
+	playerHealthBar = healthBar.clone();
+	gameEngine.stage.addChild( playerHealthBar );
+	bossHealthBar = healthBar.clone();
+	gameEngine.stage.addChild( bossHealthBar );
 }
 
 function level4Delete()
