@@ -150,7 +150,7 @@ function winLoaded()
 function winInit()
 {
 	gameEngine.stage.addChild( win );
-	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "title"; } );
+	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "credits"; } );
 }
 
 function winDelete()
@@ -179,7 +179,7 @@ function trueWinLoaded()
 function trueWinInit()
 {
 	gameEngine.stage.addChild( trueWin );
-	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "title"; } );
+	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "credits"; } );
 }
 
 function trueWinDelete()
