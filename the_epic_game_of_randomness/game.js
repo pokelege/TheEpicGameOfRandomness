@@ -1533,7 +1533,7 @@ function level4Init()
 	spriteArray = new Array();
 
 
-	boss = new moveableAttacker( new moveableObject( level4Boss.clone(), new vec2( 9000, 0 ), 10 ), new shortRangeAttack( level4Boss.getTransformedBounds().width / 4, -level4Boss.getTransformedBounds().height / 4, 100, 100 ) );
+	boss = new moveableAttacker( new moveableObject( level4Boss.clone(), new vec2( 9000, 0 ), 10 ), new shortRangeAttack( 0, -level4Boss.getTransformedBounds().height / 4,level4Boss.getTransformedBounds().width, 10 ) );
 	boss.attacker.debugSprite = pixel.clone();
 	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
 	spriteArray.push( boss.moveable );
