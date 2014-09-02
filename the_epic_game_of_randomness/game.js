@@ -1,4 +1,4 @@
-function modeStruct(title, data)
+function modeStruct( title, data )
 {
 	this.title = title;
 	this.data = data;
@@ -7,9 +7,9 @@ function modeStruct(title, data)
 //The engine nameSpace
 var gameEngine =
 {
-	mode:"title",
+	mode: "title",
 	MAINFPS: 30,
-	DT:1/30,
+	DT: 1 / 30,
 	CANVASWIDTH: 800,
 	CANVASHEIGHT: 600,
 	stage: null,
@@ -62,13 +62,13 @@ var gameEngine =
 
 	//add your updateModeLoopers to this map
 	updateModeLooperArray: new Array(),
-	addModeLooper: function(key, theUpdateModeLooper)
+	addModeLooper: function ( key, theUpdateModeLooper )
 	{
-		gameEngine.updateModeLooperArray.push( new modeStruct( key, theUpdateModeLooper) );
+		gameEngine.updateModeLooperArray.push( new modeStruct( key, theUpdateModeLooper ) );
 	},
 
 	//call this to delete all stages based on your deleter
-	removeAll: function()
+	removeAll: function ()
 	{
 		for ( i = 0; i < gameEngine.updateModeLooperArray.length; i++ )
 		{
@@ -82,7 +82,7 @@ var gameEngine =
 	},
 
 	//#region loading
-	barBorder : null, progressBar: null, loadingText: null, backgroundColor: null,
+	barBorder: null, progressBar: null, loadingText: null, backgroundColor: null,
 	loadingTextWidth: null,
 	loadingInitialized: false,
 	loadingInit: function ()
@@ -126,9 +126,9 @@ var gameEngine =
 		gameEngine.loadingInitialized = false;
 	},
 
-	loadingUpdate: function (queues)
+	loadingUpdate: function ( queues )
 	{
-		if(gameEngine.loadingInitialized)
+		if ( gameEngine.loadingInitialized )
 		{
 			var progress = 0;
 			for ( i = 0; i < queues.length; i++ )
@@ -147,11 +147,11 @@ var gameEngine =
 	//#endregion
 
 	//the loop, don't touch
-	loop: function()
+	loop: function ()
 	{
 		for ( var i = 0; i < gameEngine.updateModeLooperArray.length; i++ )
 		{
-			if(gameEngine.updateModeLooperArray[i].title == gameEngine.mode)
+			if ( gameEngine.updateModeLooperArray[i].title == gameEngine.mode )
 			{
 				gameEngine.updateModeLooperArray[i].data.update();
 				break;
@@ -406,27 +406,15 @@ var gameEngine =
 		}
 	},
 
-	main: function()
+	main: function ()
 	{
 		gameEngine.setUpCanvas();
 		createjs.Ticker.addEventListener( "tick", gameEngine.loop );
 		createjs.Ticker.setFPS( gameEngine.MAINFPS );
-		if(andrewMain)
-		{
-			andrewMain();
-		}
-		if(wardellMain)
-		{
-			wardellMain();
-		}
-		if(josephMain)
-		{
-			josephMain();
-		}
+		andrewMain();
 	}
 }
 
-var wardellMain, josephMain;
 if ( !!( window.addEventListener ) )
 {
 	window.addEventListener( "DOMContentLoaded", gameEngine.main );
