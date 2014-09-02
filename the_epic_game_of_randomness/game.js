@@ -597,7 +597,7 @@ function winUpdate()
 //#region trueWin
 var trueWinManifest =
 	[
-		{ src: "images/trueWin.jpg", id: "trueWin" }
+		{ src: "images/win.jpg", id: "trueWin" }
 	];
 var trueWinQueue;
 var trueWin;
