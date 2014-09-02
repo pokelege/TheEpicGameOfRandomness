@@ -654,6 +654,7 @@ var enemies;
 var powerStars;
 var boss;
 var bossHealthBar;
+var bossText;
 var spriteArray;
 var stageBounds;
 var cameraBounds;
@@ -990,8 +991,16 @@ function updateLife()
 	}
 
 	var distance = boss.moveable.position.subtract( player.moveable.position ).length()
-	if ( distance < gameEngine.CANVASWIDTH * 1.25 ) bossHealthBar.visible = true;
-	else bossHealthBar.visible = false;
+	if ( distance < gameEngine.CANVASWIDTH * 1.25 )
+	{
+		bossText.visible = true;
+		bossHealthBar.visible = true;
+	}
+	else
+	{
+		bossText.visible = false;
+		bossHealthBar.visible = false;
+	}
 
 
 	lastBossLife += ( bosslife - lastBossLife ) * lifeMoveSpeed;
@@ -1149,9 +1158,17 @@ function level4Init()
 	invisibleTimeLeft = 0;
 	playerHealthBar = healthBar.clone();
 	gameEngine.stage.addChild( playerHealthBar );
+
+	bossText = new createjs.Text( "Boss", "16px Comic Sans MS", "#FFF" );
+	bossText.regX = bossText.getMeasuredWidth();
+	bossText.regY = bossText.getMeasuredHeight();
+	bossText.x = gameEngine.CANVASWIDTH;
+	bossText.y = gameEngine.CANVASHEIGHT;
+	gameEngine.stage.addChild( bossText );
+
 	bossHealthBar = healthBar.clone();
 	bossHealthBar.x = gameEngine.CANVASWIDTH;
-	bossHealthBar.y = gameEngine.CANVASHEIGHT - bossHealthBar.getTransformedBounds().height;
+	bossHealthBar.y = gameEngine.CANVASHEIGHT - bossHealthBar.getTransformedBounds().height - bossText.getTransformedBounds().height;
 	gameEngine.stage.addChild( bossHealthBar );
 	score = 0;
 
@@ -1190,7 +1207,7 @@ function level4Update()
 		var gotAllEggs = true;
 		for ( var i = 0; i < easterEggs.length; i++ )
 		{
-			if(easterEggs.sprite.visible)
+			if(easterEggs[i].sprite.visible)
 			{
 				gotAllEggs = false;
 			}
