@@ -24,6 +24,102 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "the_epic_game_of_randomness
 		SlnRelativePath = "the_epic_game_of_randomness\"
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DF721BFD-3377-4A02-B85B-9AC4DE5AC5CD}"
+	ProjectSection(SolutionItems) = preProject
+		src\BackGrounds.xcf = src\BackGrounds.xcf
+		src\Bom_Teatty.jpg = src\Bom_Teatty.jpg
+		src\building1.xcf = src\building1.xcf
+		src\building2.xcf = src\building2.xcf
+		src\Bullet.xcf = src\Bullet.xcf
+		src\Button.xcf = src\Button.xcf
+		src\Character.fla = src\Character.fla
+		src\Character.xcf = src\Character.xcf
+		src\CharaterWindow.xcf = src\CharaterWindow.xcf
+		src\Credits.xcf = src\Credits.xcf
+		src\easter_egg.png = src\easter_egg.png
+		src\easter_egg.xcf = src\easter_egg.xcf
+		src\Enemy.xcf = src\Enemy.xcf
+		src\floor.xcf = src\floor.xcf
+		src\fpsBar.xcf = src\fpsBar.xcf
+		src\gameMusic.mid = src\gameMusic.mid
+		src\GameOver.xcf = src\GameOver.xcf
+		src\Health.xcf = src\Health.xcf
+		src\Heve_Stalladay.jpg = src\Heve_Stalladay.jpg
+		src\HUD.xcf = src\HUD.xcf
+		src\Instructions.xcf = src\Instructions.xcf
+		src\jamie.xcf = src\jamie.xcf
+		src\Kamie_Jing.jpg = src\Kamie_Jing.jpg
+		src\normalButtons.xcf = src\normalButtons.xcf
+		src\PowerStar.xcf = src\PowerStar.xcf
+		src\SelectionScreen.xcf = src\SelectionScreen.xcf
+		src\Title_Screen (02).jpg = src\Title_Screen (02).jpg
+		src\TitleScreen.xcf = src\TitleScreen.xcf
+		src\Tittle_Screen (01).jpg = src\Tittle_Screen (01).jpg
+		src\Train.xcf = src\Train.xcf
+		src\Train_Background.xcf = src\Train_Background.xcf
+		src\Victory_Screen.jpg = src\Victory_Screen.jpg
+		src\WinScreen.xcf = src\WinScreen.xcf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2D8B79DC-5F15-47AE-AB87-43560BD123EC}"
+	ProjectSection(SolutionItems) = preProject
+		src\BackGrounds.xcf = src\BackGrounds.xcf
+		src\Bom_Teatty.jpg = src\Bom_Teatty.jpg
+		src\building1.xcf = src\building1.xcf
+		src\building2.xcf = src\building2.xcf
+		src\Bullet.xcf = src\Bullet.xcf
+		src\Button.xcf = src\Button.xcf
+		src\Character.fla = src\Character.fla
+		src\Character.xcf = src\Character.xcf
+		src\CharaterWindow.xcf = src\CharaterWindow.xcf
+		src\Credits.xcf = src\Credits.xcf
+		src\easter_egg.png = src\easter_egg.png
+		src\easter_egg.xcf = src\easter_egg.xcf
+		src\Enemy.xcf = src\Enemy.xcf
+		src\floor.xcf = src\floor.xcf
+		src\fpsBar.xcf = src\fpsBar.xcf
+		src\gameMusic.mid = src\gameMusic.mid
+		src\GameOver.xcf = src\GameOver.xcf
+		src\Health.xcf = src\Health.xcf
+		src\Heve_Stalladay.jpg = src\Heve_Stalladay.jpg
+		src\HUD.xcf = src\HUD.xcf
+		src\Instructions.xcf = src\Instructions.xcf
+		src\jamie.xcf = src\jamie.xcf
+		src\Kamie_Jing.jpg = src\Kamie_Jing.jpg
+		src\normalButtons.xcf = src\normalButtons.xcf
+		src\PowerStar.xcf = src\PowerStar.xcf
+		src\SelectionScreen.xcf = src\SelectionScreen.xcf
+		src\Title_Screen (02).jpg = src\Title_Screen (02).jpg
+		src\TitleScreen.xcf = src\TitleScreen.xcf
+		src\Tittle_Screen (01).jpg = src\Tittle_Screen (01).jpg
+		src\Train.xcf = src\Train.xcf
+		src\Train_Background.xcf = src\Train_Background.xcf
+		src\Victory_Screen.jpg = src\Victory_Screen.jpg
+		src\WinScreen.xcf = src\WinScreen.xcf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "levels", "levels", "{9A55D9CB-31BA-487A-869D-EC7ED4BC4B41}"
+	ProjectSection(SolutionItems) = preProject
+		src\Levels\Baker_Shelf.xcf = src\Levels\Baker_Shelf.xcf
+		src\Levels\Bakery.xcf = src\Levels\Bakery.xcf
+		src\Levels\Bench.xcf = src\Levels\Bench.xcf
+		src\Levels\Chair.xcf = src\Levels\Chair.xcf
+		src\Levels\Commons.xcf = src\Levels\Commons.xcf
+		src\Levels\Construction_Zone.xcf = src\Levels\Construction_Zone.xcf
+		src\Levels\Door_Left.xcf = src\Levels\Door_Left.xcf
+		src\Levels\Door_Right.xcf = src\Levels\Door_Right.xcf
+		src\Levels\French Baugget.xcf = src\Levels\French Baugget.xcf
+		src\Levels\Girder.xcf = src\Levels\Girder.xcf
+		src\Levels\LampPost.xcf = src\Levels\LampPost.xcf
+		src\Levels\Lights.xcf = src\Levels\Lights.xcf
+		src\Levels\Park.xcf = src\Levels\Park.xcf
+		src\Levels\Tabel.xcf = src\Levels\Tabel.xcf
+		src\Levels\Tile.xcf = src\Levels\Tile.xcf
+		src\Levels\Trash_Can.xcf = src\Levels\Trash_Can.xcf
+		src\Levels\Unfinished_Building.xcf = src\Levels\Unfinished_Building.xcf
+		src\Levels\WoodPile.xcf = src\Levels\WoodPile.xcf
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,5 +130,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2D8B79DC-5F15-47AE-AB87-43560BD123EC} = {DF721BFD-3377-4A02-B85B-9AC4DE5AC5CD}
+		{9A55D9CB-31BA-487A-869D-EC7ED4BC4B41} = {2D8B79DC-5F15-47AE-AB87-43560BD123EC}
 	EndGlobalSection
 EndGlobal
