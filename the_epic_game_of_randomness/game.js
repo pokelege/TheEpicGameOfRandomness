@@ -639,7 +639,7 @@ function characterSelectLoaded()
 function characterSelectInit()
 {
 	gameEngine.stage.addChild( characterSelect );
-	gameEngine.stage.on( "click", function ( evt ) { if ( evt.stageX < gameEngine.CANVASWIDTH / 2 ) characterMode = "jamie"; else characterMode = "halladay"; gameEngine.mode = "level4" } );
+	gameEngine.stage.on( "click", function ( evt ) { if ( evt.stageX < gameEngine.CANVASWIDTH / 2 ) characterMode = "jamie"; else characterMode = "halladay"; gameEngine.mode = "level5" } );
 }
 
 function characterSelectDelete()
@@ -714,9 +714,14 @@ var Level4Queue, level4Frame, level4Enemy, level4Boss, level4BackGround, level4C
 
 var Level5Manifest =
 	[
-
+		{ src: "images/level5/level5Frame.png", id: "level5Frame" },
+		{ src: "images/level5/level5Enemy.png", id: "level5Enemy" },
+		{ src: "images/level5/level5Enemy.png", id: "level5Boss" },
+		{ src: "images/level5/level5BackGround.png", id: "level5BackGround" },
+		{ src: "images/level5/level5WoodPile.png", id: "level5WoodPile" },
+		{ src: "images/level5/level5Building.png", id: "level5Building" },
 	];
-var Level5Queue;
+var Level5Queue, level5Frame, level5Enemy, level5Boss, level5BackGround, level5WoodPile, level5Building;
 
 
 function mainGameLoaded()
@@ -1018,7 +1023,57 @@ function level4Loaded()
 
 function level5Loaded()
 {
+	var level5EnemySheet = new createjs.SpriteSheet
+(
+{
+	images: [Level5Queue[0].getResult( "level5Enemy" )],
+	frames:
+		{
+			regX: 367 / 2,
+			regY: 311 * 0.80,
+			width: 367,
+			height: 311
+		},
+	animations:
+		{
+			Neutral: [0, 0],
+			Die: [1, 9, false]
+		}
+}
+);
+	level5Enemy = new createjs.Sprite( level5EnemySheet, "Neutral" );
+	level5Enemy.scaleX = 0.75;
+	level5Enemy.scaleY = 0.75;
 
+	var level5BossSheet = new createjs.SpriteSheet
+	(
+	{
+		images: [Level5Queue[0].getResult( "level5Boss" )],
+		frames:
+			{
+				regX: 367 / 2,
+				regY: 311 * 0.20,
+				width: 367,
+				height: 311
+			},
+		animations:
+			{
+				Neutral: [0, 0],
+				Die: [1, 9, false]
+			}
+	}
+	);
+	level5Boss = new createjs.Sprite( level5BossSheet, "Neutral" );
+	level5Boss.scaleX = 1.5;
+	level5Boss.scaleY = -1.5;
+
+	level5BackGround = new createjs.Bitmap( Level5Queue[0].getResult( "level5BackGround" ) );
+
+	level5WoodPile = new createjs.Bitmap( Level5Queue[0].getResult( "level5WoodPile" ) );
+	level5WoodPile.regY = level5WoodPile.getBounds().height;
+
+	level5Building = new createjs.Bitmap( Level5Queue[0].getResult( "level5Building" ) );
+	level5Building.regY = level5Building.getBounds().height;
 }
 
 function vec2( x, y )
@@ -1854,19 +1909,6 @@ function level1Update()
 	if ( !boss.moveable.sprite.visible )
 	{
 		gameEngine.mode = "level2";
-		//var gotAllEggs = true;
-		//for ( var i = 0; i < easterEggs.length; i++ )
-		//{
-		//	if ( easterEggs[i].sprite.visible )
-		//	{
-		//		gotAllEggs = false;
-		//	}
-		//}
-		//if ( gotAllEggs )
-		//{
-		//	gameEngine.mode = "trueWin";
-		//}
-		//else gameEngine.mode = "win";
 	}
 }
 //#endregion
@@ -1988,19 +2030,6 @@ function level2Update()
 	if ( !boss.moveable.sprite.visible )
 	{
 		gameEngine.mode = "level3";
-		//var gotAllEggs = true;
-		//for ( var i = 0; i < easterEggs.length; i++ )
-		//{
-		//	if ( easterEggs[i].sprite.visible )
-		//	{
-		//		gotAllEggs = false;
-		//	}
-		//}
-		//if ( gotAllEggs )
-		//{
-		//	gameEngine.mode = "trueWin";
-		//}
-		//else gameEngine.mode = "win";
 	}
 }
 //#endregion
@@ -2009,7 +2038,7 @@ function level2Update()
 function level3Init()
 {
 	backDrops = new Array();
-	backDrops.push( new moveableBackdrop( level3BackGround, 1, new vec2( 0, 0 ), new vec2( 0, 0 ), new vec2( level1BackGround.getBounds().width, 0 ), false, true ) );
+	backDrops.push( new moveableBackdrop( level3BackGround, 1, new vec2( 0, 0 ), new vec2( 0, 0 ), new vec2( level3BackGround.getBounds().width, 0 ), false, true ) );
 	backDrops.push( new moveableBackdrop( level3Shelf, 1, new vec2( Math.random() * 20, 320 ), new vec2( 0, 0 ), new vec2( level3Shelf.getTransformedBounds().width + 500, 0 ), false, true ) );
 	for ( var i = 0; i < backDrops.length; i++ )
 	{
@@ -2129,7 +2158,7 @@ function level3Update()
 function level4Init()
 {
 	backDrops = new Array();
-	backDrops.push( new moveableBackdrop( level4BackGround, 1, new vec2( 0, 0 ), new vec2( 0, 0 ), new vec2( level1BackGround.getBounds().width, 0 ), false, true ) );
+	backDrops.push( new moveableBackdrop( level4BackGround, 1, new vec2( 0, 0 ), new vec2( 0, 0 ), new vec2( level4BackGround.getBounds().width, 0 ), false, true ) );
 	backDrops.push( new moveableBackdrop( level4DoorRight, 0.9, new vec2( Math.random() * 20, 320 ), new vec2( 0, 0 ), new vec2( level4DoorRight.getTransformedBounds().width + 500, 0 ), false, true ) );
 	backDrops.push( new moveableBackdrop( level4Chair, 1, new vec2(( level4Table.getTransformedBounds().width / 2 ) - ( level4Chair.getTransformedBounds().width / 2 ), 400 ), new vec2( 0, 0 ), new vec2( level4Chair.getTransformedBounds().width + 100, 0 ), false, true ) );
 	backDrops.push( new moveableBackdrop( level4Table, 1, new vec2( 0, 400 ), new vec2( 0, 0 ), new vec2( level4Table.getTransformedBounds().width + 100, 0 ), false, true ) );
@@ -2251,17 +2280,142 @@ function level4Update()
 //#region level5
 function level5Init()
 {
+	backDrops = new Array();
+	backDrops.push( new moveableBackdrop( level5BackGround, 1, new vec2( 0, 0 ), new vec2( 0, 0 ), new vec2( level5BackGround.getBounds().width, 0 ), false, true ) );
+	backDrops.push( new moveableBackdrop( level5Building, 0.8, new vec2( Math.random() * 20, 300 ), new vec2( 0, 0 ), new vec2( level5Building.getTransformedBounds().width + 500, 0 ), false, true ) );
+	level5WoodPile.scaleX = 0.25;
+	level5WoodPile.scaleY = 0.25;
+	backDrops.push( new moveableBackdrop( level5WoodPile, 0.8, new vec2( Math.random() * 20, 320 ), new vec2( 0, 0 ), new vec2( level5WoodPile.getTransformedBounds().width + 500, 0 ), false, true ) );
+	level5WoodPile.scaleX = 0.75;
+	level5WoodPile.scaleY = 0.75;
+	backDrops.push( new moveableBackdrop( level5WoodPile, 0.9, new vec2( Math.random() * 20, 333 ), new vec2( 0, 0 ), new vec2( level5WoodPile.getTransformedBounds().width + 500, 0 ), false, true ) );
+	level5WoodPile.scaleX = 1;
+	level5WoodPile.scaleY = 1;
+	backDrops.push( new moveableBackdrop( level5WoodPile, 1, new vec2( Math.random() * 20, 410 ), new vec2( 0, 0 ), new vec2( level5WoodPile.getTransformedBounds().width + 500, 0 ), false, true ) );
+	for ( var i = 0; i < backDrops.length; i++ )
+	{
+		for ( var j = 0; j < backDrops[i].array.length; j++ )
+		{
+			gameEngine.stage.addChild( backDrops[i].array[j] );
+		}
+	}
 
+	spriteArray = new Array();
+
+
+	boss = new moveableAttacker( new moveableObject( level5Boss.clone(), new vec2( 9000, 0 ), 10 ), new shortRangeAttack( 0, -level5Boss.getTransformedBounds().height / 8, level5Boss.getTransformedBounds().width, 10 ), 50 );
+	boss.attacker.characterSprite = boss.moveable.sprite;
+	boss.attacker.debugSprite = pixel.clone();
+	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
+	spriteArray.push( boss.moveable );
+	gameEngine.stage.addChild( boss.moveable.sprite );
+	gameEngine.stage.addChild( boss.attacker.debugSprite );
+	enemies = new Array();
+	for ( var i = 0; i < 100; i++ )
+	{
+		enemies.push( new moveableAttacker( new moveableObject( level5Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( 10000 - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level5Enemy.getTransformedBounds().width / 4, -level5Enemy.getTransformedBounds().height / 4, 100, 20 ), 3 ) );
+		enemies[i].attacker.characterSprite = enemies[i].moveable.sprite;
+		enemies[i].attacker.debugSprite = pixel.clone();
+		enemies[i].attacker.debugSprite.visible = true;
+		enemies[i].moveable.sprite.on( "animationend",
+		function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; }
+		);
+		spriteArray.push( enemies[i].moveable );
+		gameEngine.stage.addChild( enemies[i].moveable.sprite );
+		gameEngine.stage.addChild( enemies[i].attacker.debugSprite );
+	}
+
+	stageBounds = new cage( 400, gameEngine.CANVASHEIGHT, 0, 10000 );
+	cameraBounds = new cage( 0, gameEngine.CANVASHEIGHT, 0, 10000 );
+	camera = new vec2( 0, 0 );
+
+	if ( characterMode == "halladay" ) loadHalladay();
+	else loadJamie();
+
+	powerStars = new Array();
+	for ( var i = 0; i < 4; i++ )
+	{
+		powerStars.push( new moveableObject( powerStar.clone(), new vec2(( Math.random() * 7500 ) + gameEngine.CANVASWIDTH, 0 ) ) );
+		spriteArray.push( powerStars[i] );
+		stageBounds.contain( powerStars[i] );
+		gameEngine.stage.addChild( powerStars[i].sprite );
+	}
+
+	easterEggs = new Array();
+	for ( var i = 0; i < 2; i++ )
+	{
+		easterEggs.push( new moveableObject( easterEgg.clone(), new vec2(( Math.random() * 7500 ) + gameEngine.CANVASWIDTH, 0 ) ) );
+		spriteArray.push( easterEggs[easterEggs.length - 1] );
+		stageBounds.contain( easterEggs[easterEggs.length - 1] );
+		gameEngine.stage.addChild( easterEggs[easterEggs.length - 1].sprite )
+	}
+
+	jumpable = true;
+	lastLife = player.life;
+	lastBossLife = boss.life;
+	invisibleTimeLeft = 0;
+	playerHealthBar = healthBar.clone();
+	gameEngine.stage.addChild( playerHealthBar );
+
+	bossText = new createjs.Text( "Boss", "16px Comic Sans MS", "#FFF" );
+	bossText.regX = bossText.getMeasuredWidth();
+	bossText.regY = bossText.getMeasuredHeight();
+	bossText.x = gameEngine.CANVASWIDTH;
+	bossText.y = gameEngine.CANVASHEIGHT;
+	gameEngine.stage.addChild( bossText );
+
+	bossHealthBar = healthBar.clone();
+	bossHealthBar.x = gameEngine.CANVASWIDTH;
+	bossHealthBar.y = gameEngine.CANVASHEIGHT - bossHealthBar.getTransformedBounds().height - bossText.getTransformedBounds().height;
+	gameEngine.stage.addChild( bossHealthBar );
+	score = 0;
+
+	var scoreText = new createjs.Text( "Score", "16px Comic Sans MS", "#000" );
+	scoreText.regX = scoreText.getMeasuredWidth();
+	scoreText.x = gameEngine.CANVASWIDTH;
+
+	scoreDisplay = new createjs.Text( score, "16px Comic Sans MS", "#000" );
+	scoreDisplay.x = gameEngine.CANVASWIDTH - scoreDisplay.getMeasuredWidth();
+	scoreDisplay.y = scoreText.getMeasuredHeight();
+	gameEngine.stage.addChild( scoreText );
+	gameEngine.stage.addChild( scoreDisplay );
 }
 
 function level5Delete()
 {
-
+	gameEngine.stage.removeAllChildren();
+	backDrops = spriteArray = enemies = stageBounds = null;
 }
 
 function level5Update()
 {
-
+	playerMovement();
+	enemyMovement();
+	bossUpdate();
+	cameraFollowPlayer();
+	moveableObjectsUpdate( spriteArray );
+	updateLife();
+	invisibilityUpdate();
+	scoreDisplay.text = score;
+	scoreDisplay.x = gameEngine.CANVASWIDTH - scoreDisplay.getMeasuredWidth();
+	if ( player.life <= 0 ) gameEngine.mode = "gameover";
+	if ( !boss.moveable.sprite.visible )
+	{
+		gameEngine.mode = "level3";
+		var gotAllEggs = true;
+		for ( var i = 0; i < easterEggs.length; i++ )
+		{
+			if ( easterEggs[i].sprite.visible )
+			{
+				gotAllEggs = false;
+			}
+		}
+		if ( gotAllEggs )
+		{
+			gameEngine.mode = "trueWin";
+		}
+		else gameEngine.mode = "win";
+	}
 }
 //#endregion
 
