@@ -668,14 +668,16 @@ function characterSelectUpdate()
 var mainGameManifest =
 	[
 		{ src: "images/jamieChara.png", id: "jamieChara" },
+		{ src: "images/powerStar.png", id: "jamieIcon" },
 		{ src: "images/jamieChara.png", id: "halladayChara" },
+		{ src: "images/powerStar.png", id: "halladayIcon" },
 		{ src: "images/fpsBar.png", id: "healthBar" },
 		{ src: "images/powerStar.png", id: "powerStar" },
 		{ src: "images/easterEgg.png", id: "easterEgg" },
 		{ src: "images/pixel.png", id: "pixel" },
 		{src: "audio/InGame.mp3", id: "gameMusic"}
 	];
-var mainGameQueue, jamieChara, halladayChara, pixel, healthBar, powerStar, easterEgg, gameMusic;
+var mainGameQueue, jamieChara, jamieIcon, halladayChara, halladayIcon, pixel, healthBar, powerStar, easterEgg, gameMusic;
 
 var Level1Manifest =
 	[
@@ -759,6 +761,19 @@ function mainGameLoaded()
 	jamieChara.scaleX = 0.75;
 	jamieChara.scaleY = 0.75;
 	jamieChara.regY = jamieChara.getTransformedBounds().height / 2;
+
+	jamieIcon = new createjs.Bitmap( mainGameQueue.getResult( "jamieIcon" ) );
+	if ( jamieIcon.getTransformedBounds().width > jamieIcon.getTransformedBounds().height )
+	{
+		jamieIcon.scaleX = 64 / jamieIcon.getBounds().width;
+		jamieIcon.scaleY = 64 / jamieIcon.getBounds().width;
+	}
+	else
+	{
+		jamieIcon.scaleX = 64 / jamieIcon.getBounds().height;
+		jamieIcon.scaleY = 64 / jamieIcon.getBounds().height;
+	}
+
 	var halladayCharaSheet = new createjs.SpriteSheet
 (
 	{
@@ -779,6 +794,19 @@ function mainGameLoaded()
 	halladayChara.scaleX = 0.75;
 	halladayChara.scaleY = 0.75;
 	halladayChara.regY = halladayChara.getTransformedBounds().height / 2;
+
+	halladayIcon = new createjs.Bitmap( mainGameQueue.getResult( "jamieIcon" ) );
+	if ( halladayIcon.getTransformedBounds().width > halladayIcon.getTransformedBounds().height )
+	{
+		halladayIcon.scaleX = 64 / halladayIcon.getBounds().width;
+		halladayIcon.scaleY = 64 / halladayIcon.getBounds().width;
+	}
+	else
+	{
+		halladayIcon.scaleX = 64 / halladayIcon.getBounds().height;
+		halladayIcon.scaleY = 64 / halladayIcon.getBounds().height;
+	}
+
 	var fpsBarSheet = new createjs.SpriteSheet
 		(
 		{
@@ -820,7 +848,12 @@ function level1Loaded()
 {
 	images: [Level1Queue[0].getResult( "level1Enemy" )],
 	frames:
-		[[0, 0, 69, 93, 0, 23.9, 20.1], [69, 0, 92, 107, 0, 38.9, 19.1], [161, 0, 76, 100, 0, 27.9, 22.1]],
+		{
+			regX: 0,
+			regY: 0,
+			width: 284,
+			height: 409,
+		},
 	animations:
 		{
 			Neutral: [0, 0],
@@ -832,7 +865,7 @@ function level1Loaded()
 			},
 			Attack1:
 			{
-				frames: [0, 1],
+				frames: [1],
 				next: "Neutral",
 				speed: 0.25
 			}
@@ -840,10 +873,10 @@ function level1Loaded()
 }
 );
 	level1Enemy = new createjs.Sprite( level1EnemySheet, "Neutral" );
-	level1Enemy.scaleX = 0.75;
-	level1Enemy.scaleY = 0.75;
-	level1Enemy.regX = level1Enemy.getTransformedBounds().width / 2;
-	level1Enemy.regY = level1Enemy.getTransformedBounds().height;
+	level1Enemy.regX = level1Enemy.getBounds().width / 2;
+	level1Enemy.regY = level1Enemy.getBounds().height;
+	level1Enemy.scaleX = 0.5;
+	level1Enemy.scaleY = 0.5;
 
 	level1EnemyIcon = new createjs.Bitmap( Level1Queue[0].getResult( "level1EnemyIcon" ) );
 	if ( level1EnemyIcon.getTransformedBounds().width > level1EnemyIcon.getTransformedBounds().height )
@@ -857,8 +890,8 @@ function level1Loaded()
 		level1EnemyIcon.scaleY = 64 / level1EnemyIcon.getBounds().height;
 	}
 
-	level1EnemyIcon.regX = level1EnemyIcon.getTransformedBounds().width;
-	level1EnemyIcon.regY = level1EnemyIcon.getTransformedBounds().height;
+	level1EnemyIcon.regX = level1EnemyIcon.getBounds().width;
+	level1EnemyIcon.regY = level1EnemyIcon.getBounds().height;
 
 
 	var level1BossSheet = new createjs.SpriteSheet
@@ -1666,10 +1699,9 @@ function enemyMovement()
 			enemies[i].attacker.update();
 
 			var distance = enemies[i].moveable.position.subtract( player.moveable.position ).length()
-			if ( distance > 175 && distance < gameEngine.CANVASWIDTH * 1.25 )
+			if ( !enemies[i].attacker.collideSprite( player.moveable.sprite ) && enemies[i].moveable.sprite.currentAnimation != "Attack1" )
 			{
 				if ( enemies[i].moveable.sprite.currentAnimation != "Run" ) enemies[i].moveable.sprite.gotoAndPlay("Run");
-				enemies[i].attacker.debugSprite.visible = false;
 				moveToPlayer( enemies[i].moveable );
 
 				if ( enemies[i].moveable.facing == "right" )
@@ -1698,18 +1730,10 @@ function enemyMovement()
 				}
 			}
 
-			else if ( Math.random() <= 0.25 )
+			else if ( Math.random() <= 0.25 && enemies[i].moveable.sprite.currentAnimation != "Attack1" )
 			{
 				enemies[i].moveable.sprite.gotoAndPlay( "Attack1" );
 			}
-			else
-			{
-				enemies[i].attacker.debugSprite.visible = false;
-			}
-		}
-		else
-		{
-			enemies[i].attacker.debugSprite.visible = false;
 		}
 	}
 }
@@ -1720,10 +1744,10 @@ function enemyAttack(enemySprite)
 	{
 		if(enemies[i].moveable.sprite == enemySprite)
 		{
-			enemies[i].attacker.debugSprite.visible = true;
+			//enemies[i].attacker.debugSprite.visible = true;
 			if ( invisibleTimeLeft <= 0 && enemies[i].attacker.collideSprite( player.moveable.sprite ) )
 			{
-				player.life -= 0.1;
+				player.life -= 1;
 			}
 		}
 	}
@@ -1735,7 +1759,7 @@ function bossUpdate()
 	{
 		boss.attacker.update();
 		var distance = boss.moveable.position.subtract( player.moveable.position ).length()
-		if ( distance > 175 && distance < gameEngine.CANVASWIDTH * 1.25 )
+		if ( !boss.attacker.collideSprite( player.moveable.sprite ) )
 		{
 			boss.attacker.debugSprite.visible = false;
 			moveToPlayer( boss.moveable );
@@ -1872,6 +1896,7 @@ function moveableObjectsUpdate( theSprites )
 }
 
 var playerHealthBar;
+var playerIcon;
 var lastLife;
 var lastEnemyLife;
 var enemyTarget;
@@ -1962,6 +1987,7 @@ function loadJamie()
 	spriteArray.push( player.moveable );
 	spriteContainer.addChild( player.moveable.sprite );
 	spriteContainer.addChild( player.attacker.debugSprite );
+	playerIcon = jamieIcon;
 }
 
 function loadHalladay()
@@ -1977,6 +2003,7 @@ function loadHalladay()
 	spriteArray.push( player.moveable );
 	spriteContainer.addChild( player.moveable.sprite );
 	spriteContainer.addChild( player.attacker.debugSprite );
+	playerIcon = halladayIcon
 }
 
 var score;
@@ -2070,11 +2097,11 @@ function level1Init()
 		}
 	}
 
-	boss = new moveableAttacker( new moveableObject( level1Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( 0, -level1Boss.getTransformedBounds().height / 8, level1Boss.getTransformedBounds().width, 10 ), 50 );
+	boss = new moveableAttacker( new moveableObject( level1Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( 0, -level1Boss.getTransformedBounds().height / 8, level1Boss.getTransformedBounds().width, 10 ), 100 );
 	boss.icon = level1BossIcon.clone();
 
 	boss.icon.x = gameEngine.CANVASWIDTH;
-	boss.icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height;
+	boss.icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height - 5;
 	boss.attacker.characterSprite = boss.moveable.sprite;
 	boss.attacker.debugSprite = pixel.clone();
 	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
@@ -2084,17 +2111,17 @@ function level1Init()
 	enemies = new Array();
 	for ( var i = 0; i < 10; i++ )
 	{
-		enemies.push( new moveableAttacker( new moveableObject( level1Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - ( gameEngine.CANVASWIDTH * 2 ) ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level1Enemy.getTransformedBounds().width / 4, -level1Enemy.getTransformedBounds().height / 4, 100, 20 ), 3 ) );
+		enemies.push( new moveableAttacker( new moveableObject( level1Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - ( gameEngine.CANVASWIDTH * 2 ) ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level1Enemy.getTransformedBounds().width / 8, -level1Enemy.getTransformedBounds().height * 0.9, 50, level1Enemy.getTransformedBounds().height / 2 ), 3 ) );
 		enemies[i].attacker.characterSprite = enemies[i].moveable.sprite;
-		enemies[i].attacker.debugSprite = pixel.clone();
-		enemies[i].attacker.debugSprite.visible = true;
+		//enemies[i].attacker.debugSprite = pixel.clone();
+		//enemies[i].attacker.debugSprite.visible = true;
 		enemies[i].moveable.sprite.on( "animationend",
 		function ( evt ) { if ( evt.name == "Attack1" ) enemyAttack(evt.target); }
 		);
 		enemies[i].icon = level1EnemyIcon.clone();
 
 		enemies[i].icon.x = gameEngine.CANVASWIDTH;
-		enemies[i].icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height;
+		enemies[i].icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height - 5;
 		spriteArray.push( enemies[i].moveable );
 		spriteContainer.addChild( enemies[i].moveable.sprite );
 		spriteContainer.addChild( enemies[i].attacker.debugSprite );
@@ -2118,12 +2145,26 @@ function level1Init()
 	lastLife = player.life;
 
 	invisibleTimeLeft = 0;
+	var playerHealthBox = new createjs.Shape();
 	playerHealthBar = healthBar.clone();
+	playerHealthBox.graphics.beginFill( "FFF" ).drawRect( 0, 0, 250, playerHealthBar.getTransformedBounds().height + 74 );
+	playerHealthBox.alpha = 0.5;
+	gameEngine.stage.addChild( playerHealthBox );
+
 	gameEngine.stage.addChild( playerHealthBar );
+	gameEngine.stage.addChild( playerIcon );
+	playerHealthBar.y = playerIcon.getTransformedBounds().height + 5;
 
 	enemyHealthBar = healthBar.clone();
+	
 	enemyHealthBar.x = gameEngine.CANVASWIDTH;
 	enemyHealthBar.y = gameEngine.CANVASHEIGHT - enemyHealthBar.getTransformedBounds().height;
+	var enemyHealthBox = new createjs.Shape();
+	enemyHealthBox.graphics.beginFill( "FFF" ).drawRect( 0, 0, -250, -enemyHealthBar.getTransformedBounds().height - 74 );
+	enemyHealthBox.alpha = 0.5;
+	enemyHealthBox.x = gameEngine.CANVASWIDTH;
+	enemyHealthBox.y = gameEngine.CANVASHEIGHT;
+	gameEngine.stage.addChild( enemyHealthBox );
 	gameEngine.stage.addChild( enemyHealthBar );
 	score = 0;
 
