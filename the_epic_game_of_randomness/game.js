@@ -428,6 +428,8 @@ else
 	document.onkeyup = gameEngine.handleKeyUp;
 }
 
+var mute = false;
+
 //#region title
 var titleManifest =
 [
@@ -435,9 +437,10 @@ var titleManifest =
 	{ src: "images/playButton.png", id: "playButton" },
 	{ src: "images/instructionsButton.png", id: "instructionsButton" },
 	{ src: "images/creditsButton.png", id: "creditsButton" },
+	{ src: "audio/InGame.mp3", id: "titleMusic" }
 ];
 var titleQueue;
-var titleScreen, playButton, instructionsButton, creditsButton;
+var titleScreen, playButton, instructionsButton, creditsButton, titleMusic;
 function titleLoaded()
 {
 	titleScreen = new createjs.Bitmap( titleQueue[0].getResult( "title" ) );
@@ -459,6 +462,9 @@ function titleLoaded()
 	creditsButton.regX = creditsButton.getBounds().width / 2;
 	creditsButton.x = gameEngine.CANVASWIDTH / 2;
 	creditsButton.y = instructionsButton.getTransformedBounds().height + instructionsButton.y + 5;
+
+	titleMusic = new createjs.Sound.createInstance( "titleMusic" );
+	titleMusic.setVolume( 0.50 );
 }
 
 function titleInit()
@@ -467,6 +473,7 @@ function titleInit()
 	gameEngine.stage.addChild( playButton );
 	gameEngine.stage.addChild( instructionsButton );
 	gameEngine.stage.addChild( creditsButton );
+	if ( titleMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) titleMusic.play( { loop: -1 } );
 }
 function titleDelete()
 {
@@ -474,7 +481,7 @@ function titleDelete()
 }
 function titleUpdate()
 {
-
+	titleMusic.setMute( mute );
 }
 //#endregion
 
@@ -494,6 +501,7 @@ function instructionsInit()
 {
 	gameEngine.stage.addChild( instructions );
 	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "title"; } );
+	if ( titleMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) titleMusic.play( { loop: -1 } );
 }
 
 function instructionsDelete()
@@ -503,7 +511,7 @@ function instructionsDelete()
 }
 function instructionsUpdate()
 {
-
+	titleMusic.setMute( mute );
 }
 //#endregion
 
@@ -523,6 +531,7 @@ function creditsInit()
 {
 	gameEngine.stage.addChild( credits );
 	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "title"; } );
+	if ( titleMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) titleMusic.play( { loop: -1 } );
 }
 
 function creditsDelete()
@@ -532,7 +541,7 @@ function creditsDelete()
 }
 function creditsUpdate()
 {
-
+	titleMusic.setMute( mute );
 }
 //#endregion
 
@@ -639,7 +648,8 @@ function characterSelectLoaded()
 function characterSelectInit()
 {
 	gameEngine.stage.addChild( characterSelect );
-	gameEngine.stage.on( "click", function ( evt ) { if ( evt.stageX < gameEngine.CANVASWIDTH / 2 ) characterMode = "jamie"; else characterMode = "halladay"; gameEngine.mode = "level1" } );
+	gameEngine.stage.on( "click", function ( evt ) { if ( evt.stageX < gameEngine.CANVASWIDTH / 2 ) characterMode = "jamie"; else characterMode = "halladay"; gameEngine.mode = "level1"; if ( titleMusic.playState == createjs.Sound.PLAY_SUCCEEDED ) titleMusic.stop(); } );
+	if ( titleMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) titleMusic.play( { loop: -1 } );
 }
 
 function characterSelectDelete()
@@ -649,7 +659,7 @@ function characterSelectDelete()
 }
 function characterSelectUpdate()
 {
-
+	titleMusic.setMute( mute );
 }
 //#endregion
 
@@ -662,9 +672,10 @@ var mainGameManifest =
 		{ src: "images/fpsBar.png", id: "healthBar" },
 		{ src: "images/powerStar.png", id: "powerStar" },
 		{ src: "images/easterEgg.png", id: "easterEgg" },
-		{ src: "images/pixel.png", id: "pixel" }
+		{ src: "images/pixel.png", id: "pixel" },
+		{src: "audio/InGame.mp3", id: "gameMusic"}
 	];
-var mainGameQueue, jamieChara, halladayChara, pixel, healthBar, powerStar, easterEgg;
+var mainGameQueue, jamieChara, halladayChara, pixel, healthBar, powerStar, easterEgg, gameMusic;
 
 var Level1Manifest =
 	[
@@ -794,7 +805,12 @@ function mainGameLoaded()
 
 	powerStar = new createjs.Bitmap( mainGameQueue.getResult( "powerStar" ) );
 	easterEgg = new createjs.Bitmap( mainGameQueue.getResult( "easterEgg" ) );
+	easterEgg.regX = easterEgg.getTransformedBounds().width / 2;
+	easterEgg.regY = easterEgg.getTransformedBounds().height;
 	pixel = new createjs.Bitmap( mainGameQueue.getResult( "pixel" ) );
+
+	gameMusic = new createjs.Sound.createInstance( "gameMusic" );
+	gameMusic.setVolume( 0.50 );
 }
 
 function level1Loaded()
@@ -804,24 +820,30 @@ function level1Loaded()
 {
 	images: [Level1Queue[0].getResult( "level1Enemy" )],
 	frames:
-		{
-			regX: 0,
-			regY: 0,
-			width: 367,
-			height: 311
-		},
+		[[0, 0, 69, 93, 0, 23.9, 20.1], [69, 0, 92, 107, 0, 38.9, 19.1], [161, 0, 76, 100, 0, 27.9, 22.1]],
 	animations:
 		{
 			Neutral: [0, 0],
-			Die: [1, 9, false]
+			Run:
+			{
+				frames: [0, 2],
+				next: "Run",
+				speed:0.25
+			},
+			Attack1:
+			{
+				frames: [0, 1],
+				next: "Neutral",
+				speed: 0.25
+			}
 		}
 }
 );
 	level1Enemy = new createjs.Sprite( level1EnemySheet, "Neutral" );
 	level1Enemy.scaleX = 0.75;
 	level1Enemy.scaleY = 0.75;
-	level1Enemy.regX = 367 / 2;
-	level1Enemy.regY = 311 * 0.80;
+	level1Enemy.regX = level1Enemy.getTransformedBounds().width / 2;
+	level1Enemy.regY = level1Enemy.getTransformedBounds().height;
 
 	level1EnemyIcon = new createjs.Bitmap( Level1Queue[0].getResult( "level1EnemyIcon" ) );
 	if ( level1EnemyIcon.getTransformedBounds().width > level1EnemyIcon.getTransformedBounds().height )
@@ -889,8 +911,8 @@ function level1Loaded()
 	level1Lamp.scaleY = 0.5;
 	level1Trash = new createjs.Bitmap( Level1Queue[0].getResult( "level1Trash" ) );
 	level1Trash.regY = level1Trash.getBounds().height;
-	level1Trash.scaleX = 0.25;
-	level1Trash.scaleY = 0.25;
+	level1Trash.scaleX = 0.50;
+	level1Trash.scaleY = 0.50;
 }
 
 function level2Loaded()
@@ -1199,25 +1221,78 @@ function shortRangeAttack( x, y, width, height, characterSprite )
 	}
 }
 
-function longRangeAttack( x, y, behavior, characterSprite )
+function longRangeAttack( x, y, character, projectileSprite, velocity, limit )
 {
 	this.x = x;
 	this.y = y;
-	this.characterSprite = characterSprite;
-	this.behavior = behavior;
-
+	this.character = character;
+	this.projectileSprite = projectileSprite;
+	this.array = new Array();
+	for ( var i = 0; i < limit; i++ )
+	{
+		this.array.push( new moveableObject( projectileSprite.clone(), new vec2( 0, 0 ), velocity ) );
+		this.array[i].sprite.visible = false;
+	}
 	this.update = function ()
 	{
-		behavior.update();
+		for ( var i = 0; i < this.array.length; i++ )
+		{
+			if ( this.array[i].sprite.visible )
+			{
+				this.array[i].position = this.array[i].position.add( this.array[i].velocity );
+				if(this.array[i].position.x - camera.x > gameEngine.CANVASWIDTH * 1.25 || this.array[i].position.x - camera.x < gameEngine.CANVASWIDTH * -0.25)
+				{
+					this.array[i].sprite.visible = false;
+				}
+			}
+		}
 	}
 
-	this.fire = function ()
+	this.fire = function ( flipX, flipY )
 	{
-		this.behavior.fire( this.x, this.y, this.characterSprite );
+		for ( var i = 0; i < this.array.length; i++ )
+		{
+			if ( !this.array[i].sprite.visible )
+			{
+				if ( flipX )
+				{
+					if ( this.array[i].sprite.scaleX > 0 ) this.array[i].sprite.scaleX *= -1;
+					this.array[i].position.x = this.character.position.x - this.x;
+				}
+				else
+				{
+					if ( this.array[i].sprite.scaleX < 0 ) this.array[i].sprite.scaleX *= -1;
+					this.array[i].position.x = this.character.position.x + this.x;
+				}
+
+				if ( flipY )
+				{
+					if ( this.array[i].sprite.scaleY > 0 ) this.array[i].sprite.scaleY *= -1;
+					this.array[i].position.y = this.character.position.y - this.y;
+				}
+				else
+				{
+					if ( this.array[i].sprite.scaleY < 0 ) this.array[i].sprite.scaleY *= -1;
+					this.array[i].position.y = this.character.position.y + this.y;
+				}
+				this.array[i].sprite.x = this.array[i].position.x - camera.x;
+				this.array[i].sprite.y = this.array[i].position.y + this.array[i].airDistance - camera.y;
+				this.array[i].sprite.visible = true;
+				break;
+			}
+		}
 	}
-	this.collideSprite( theSpriteTo )
+
+	this.collideSprite = function ( theSpriteTo )
 	{
-		this.behavior.collide( theSpriteTo );
+		for ( var i = 0; i < this.array.length; i++ )
+		{
+			if ( this.array[i].sprite.visible )
+			{
+				if ( ndgmr.checkPixelCollision( this.array[i].sprite, theSpriteTo, 0 ) ) return this.array[i];
+			}
+		}
+		return false;
 	}
 }
 
@@ -1532,6 +1607,7 @@ function playerMovement()
 		}
 	}
 
+	player.attacker.update();
 }
 
 function playerAttack()
@@ -1540,17 +1616,17 @@ function playerAttack()
 	//player.attacker.debugSprite.visible = true;
 	for ( var i = 0; i < enemies.length; i++ )
 	{
-		if ( enemies[i].moveable.sprite.visible && enemies[i].moveable.sprite.currentAnimation != "Die" )
+		if ( enemies[i].moveable.sprite.visible)
 		{
 			var collided = player.attacker.collideSprite( enemies[i].moveable.sprite );
 
 			if ( collided )
 			{
 				enemies[i].life -= 1;
-				if ( enemies[i].life <= 0 && enemies[i].moveable.sprite.currentAnimation != "Die" )
+				if ( enemies[i].life <= 0)
 				{
 					score += 100;
-					enemies[i].moveable.sprite.gotoAndPlay( "Die" );
+					enemies[i].moveable.sprite.visible = false;
 					updateTarget( null );
 				}
 				else updateTarget( enemies[i] );
@@ -1585,11 +1661,14 @@ function enemyMovement()
 {
 	for ( var i = 0; i < enemies.length; i++ )
 	{
-		if ( enemies[i].moveable.sprite.visible && enemies[i].moveable.sprite.currentAnimation != "Die" )
+		if ( enemies[i].moveable.sprite.visible )
 		{
+			enemies[i].attacker.update();
+
 			var distance = enemies[i].moveable.position.subtract( player.moveable.position ).length()
 			if ( distance > 175 && distance < gameEngine.CANVASWIDTH * 1.25 )
 			{
+				if ( enemies[i].moveable.sprite.currentAnimation != "Run" ) enemies[i].moveable.sprite.gotoAndPlay("Run");
 				enemies[i].attacker.debugSprite.visible = false;
 				moveToPlayer( enemies[i].moveable );
 
@@ -1621,12 +1700,7 @@ function enemyMovement()
 
 			else if ( Math.random() <= 0.25 )
 			{
-				enemies[i].attacker.debugSprite.visible = true;
-				enemies[i].attacker.update();
-				if ( invisibleTimeLeft <= 0 && enemies[i].attacker.collideSprite( player.moveable.sprite ) )
-				{
-					player.life -= 0.1;
-				}
+				enemies[i].moveable.sprite.gotoAndPlay( "Attack1" );
 			}
 			else
 			{
@@ -1640,10 +1714,26 @@ function enemyMovement()
 	}
 }
 
+function enemyAttack(enemySprite)
+{
+	for(var i = 0; i < enemies.length;i++)
+	{
+		if(enemies[i].moveable.sprite == enemySprite)
+		{
+			enemies[i].attacker.debugSprite.visible = true;
+			if ( invisibleTimeLeft <= 0 && enemies[i].attacker.collideSprite( player.moveable.sprite ) )
+			{
+				player.life -= 0.1;
+			}
+		}
+	}
+}
+
 function bossUpdate()
 {
 	if ( boss.moveable.sprite.visible && boss.moveable.sprite.currentAnimation != "Die" )
 	{
+		boss.attacker.update();
 		var distance = boss.moveable.position.subtract( player.moveable.position ).length()
 		if ( distance > 175 && distance < gameEngine.CANVASWIDTH * 1.25 )
 		{
@@ -1678,7 +1768,6 @@ function bossUpdate()
 		else if ( Math.random() <= 0.25 )
 		{
 			boss.attacker.debugSprite.visible = true;
-			boss.attacker.update();
 			if ( invisibleTimeLeft <= 0 && boss.attacker.collideSprite( player.moveable.sprite ) )
 			{
 				player.life -= 0.5;
@@ -1741,6 +1830,10 @@ function cameraFollowPlayer()
 	{
 		backDrops[i].move( oldCamera.subtract( camera ) );
 	}
+	for ( var i = 0; i < spriteContainerBackdrops.length; i++ )
+	{
+		spriteContainerBackdrops[i].move( oldCamera.subtract( camera ) );
+	}
 }
 
 function moveableObjectsUpdate( theSprites )
@@ -1766,7 +1859,7 @@ function moveableObjectsUpdate( theSprites )
 		}
 		return 0;
 	}
-	gameEngine.stage.sortChildren( sortFunction );
+	spriteContainer.sortChildren( sortFunction );
 
 	for ( var i = 0; i < theSprites.length; i++ )
 	{
@@ -1865,51 +1958,100 @@ function loadJamie()
 		if ( evt.name == "Attack1" ) playerAttack();
 	} );
 	player.attacker.characterSprite = player.moveable.sprite;
-	//player.attacker.debugSprite = pixel.clone();
+	player.attacker.debugSprite = pixel.clone();
 	spriteArray.push( player.moveable );
-	gameEngine.stage.addChild( player.moveable.sprite );
-	gameEngine.stage.addChild( player.attacker.debugSprite );
+	spriteContainer.addChild( player.moveable.sprite );
+	spriteContainer.addChild( player.attacker.debugSprite );
 }
 
 function loadHalladay()
 {
+	//player = new moveableAttacker( new moveableObject( halladayChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new longRangeAttack( halladayChara.getTransformedBounds().width, -halladayChara.getTransformedBounds().height / 2, null, powerStar.clone(), new vec2( 10, 0 ), 3 ), 100 );
 	player = new moveableAttacker( new moveableObject( halladayChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack( halladayChara.getTransformedBounds().width, -halladayChara.getTransformedBounds().height / 2, 25, 20 ), 100 );
 	player.moveable.sprite.on( "animationend", function ( evt )
 	{
 		if ( evt.name == "Attack1" ) playerAttack();
 	} );
 	player.attacker.characterSprite = player.moveable.sprite;
-	//player.attacker.debugSprite = pixel.clone();
+	player.attacker.debugSprite = pixel.clone();
 	spriteArray.push( player.moveable );
-	gameEngine.stage.addChild( player.moveable.sprite );
-	gameEngine.stage.addChild( player.attacker.debugSprite );
+	spriteContainer.addChild( player.moveable.sprite );
+	spriteContainer.addChild( player.attacker.debugSprite );
 }
 
 var score;
 var scoreDisplay;
+
+var spriteContainer;
+var spriteContainerBackdrops;
+var playerAttackers;
+var enemyAttackers;
+function collideBullets()
+{
+	//for ( var i = 0; i < enemies.length; i++ )
+	//{
+	//	if ( enemies[i].moveable.sprite.visible && enemies[i].moveable.sprite.currentAnimation != "Die" )
+	//	{
+	//		var collided = player.attacker.collideSprite( enemies[i].moveable.sprite );
+
+	//		if ( collided )
+	//		{
+	//			if(  typeof(longRangeAttack)) collided.sprite.visible = false;
+	//			enemies[i].life -= 1;
+	//			if ( enemies[i].life <= 0 && enemies[i].moveable.sprite.currentAnimation != "Die" )
+	//			{
+	//				score += 100;
+	//				enemies[i].moveable.sprite.gotoAndPlay( "Die" );
+	//				updateTarget( null );
+	//			}
+	//			else updateTarget( enemies[i] );
+	//		}
+	//	}
+	//}
+
+	//if ( boss.moveable.sprite.visible && boss.moveable.sprite.currentAnimation != "Die" )
+	//{
+	//	var collided = player.attacker.collideSprite( boss.moveable.sprite );
+
+	//	if ( collided )
+	//	{
+	//		collided.sprite.visible = false;
+	//		boss.life -= 1;
+	//		if ( boss.life <= 0 && boss.moveable.sprite.currentAnimation != "Die" )
+	//		{
+	//			score += 9001
+	//			boss.moveable.sprite.gotoAndPlay( "Die" );
+	//			updateTarget( null );
+	//		}
+	//		else
+	//		{
+
+	//			updateTarget( boss );
+	//		}
+	//	}
+	//}
+}
+
 //#region level1
 function level1Init()
 {
 	var MAXDISTANCE = 2500;
 	spriteArray = new Array();
-	stageBounds = new cage( 360, gameEngine.CANVASHEIGHT, 0, MAXDISTANCE );
+	spriteContainer = new createjs.Container();
+	stageBounds = new cage( 322, gameEngine.CANVASHEIGHT, 0, MAXDISTANCE );
 	cameraBounds = new cage( 0, gameEngine.CANVASHEIGHT, 0, MAXDISTANCE );
 
 	if ( !easterEggs ) easterEggs = new Array();
-	//for ( var i = 0; i < 2; i++ )
-	//{
-	//	easterEggs.push( new moveableObject( easterEgg.clone(), new vec2(( Math.random() * 7500 ) + gameEngine.CANVASWIDTH, 0 ) ) );
-	//	spriteArray.push( easterEggs[easterEggs.length - 1] );
-	//	stageBounds.contain( easterEggs[easterEggs.length - 1] );
-	//	gameEngine.stage.addChild( easterEggs[easterEggs.length - 1].sprite )
-	//}
+	easterEggs.push( new moveableObject( easterEgg.clone(), new vec2(( ( level1Trash.getTransformedBounds().width + 500 ) * Math.floor( Math.random() * 5 ) ) + 10, 349 ) ) );
+	spriteArray.push( easterEggs[easterEggs.length - 1] );
+	spriteContainer.addChild( easterEggs[easterEggs.length - 1].sprite );
 
 
 	backDrops = new Array();
 	backDrops.push( new moveableBackdrop( level1BackGround, 1, new vec2( 0, 0 ), new vec2( 0, 0 ), new vec2( level1BackGround.getBounds().width, 0 ), false, true ) );
 	backDrops.push( new moveableBackdrop( level1Lamp, 0.25, new vec2( Math.random() * 20, 320 ), new vec2( 0, 0 ), new vec2( level1Lamp.getTransformedBounds().width + 20, 0 ), false, true ) );
 	backDrops.push( new moveableBackdrop( level1Bench, 0.5, new vec2( Math.random() * 500, 321 ), new vec2( 0, 0 ), new vec2( level1Bench.getTransformedBounds().width + 200, 0 ), false, true ) );
-	backDrops.push( new moveableBackdrop( level1Trash, 1, new vec2( 0, 350 ), new vec2( 0, 0 ), new vec2( level1Trash.getTransformedBounds().width + 500, 0 ), false, true ) );
+
 	for ( var i = 0; i < backDrops.length; i++ )
 	{
 		for ( var j = 0; j < backDrops[i].array.length; j++ )
@@ -1918,7 +2060,15 @@ function level1Init()
 		}
 	}
 
-
+	spriteContainerBackdrops = new Array();
+	spriteContainerBackdrops.push( new moveableBackdrop( level1Trash, 1, new vec2( 0, 350 ), new vec2( 0, 0 ), new vec2( level1Trash.getTransformedBounds().width + 500, 0 ), false, true ) );
+	for ( var i = 0; i < spriteContainerBackdrops.length; i++ )
+	{
+		for ( var j = 0; j < spriteContainerBackdrops[i].array.length; j++ )
+		{
+			spriteContainer.addChild( spriteContainerBackdrops[i].array[j] );
+		}
+	}
 
 	boss = new moveableAttacker( new moveableObject( level1Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( 0, -level1Boss.getTransformedBounds().height / 8, level1Boss.getTransformedBounds().width, 10 ), 50 );
 	boss.icon = level1BossIcon.clone();
@@ -1929,8 +2079,8 @@ function level1Init()
 	boss.attacker.debugSprite = pixel.clone();
 	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
 	spriteArray.push( boss.moveable );
-	gameEngine.stage.addChild( boss.moveable.sprite );
-	gameEngine.stage.addChild( boss.attacker.debugSprite );
+	spriteContainer.addChild( boss.moveable.sprite );
+	spriteContainer.addChild( boss.attacker.debugSprite );
 	enemies = new Array();
 	for ( var i = 0; i < 10; i++ )
 	{
@@ -1939,31 +2089,31 @@ function level1Init()
 		enemies[i].attacker.debugSprite = pixel.clone();
 		enemies[i].attacker.debugSprite.visible = true;
 		enemies[i].moveable.sprite.on( "animationend",
-		function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; }
+		function ( evt ) { if ( evt.name == "Attack1" ) enemyAttack(evt.target); }
 		);
 		enemies[i].icon = level1EnemyIcon.clone();
 
 		enemies[i].icon.x = gameEngine.CANVASWIDTH;
 		enemies[i].icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height;
 		spriteArray.push( enemies[i].moveable );
-		gameEngine.stage.addChild( enemies[i].moveable.sprite );
-		gameEngine.stage.addChild( enemies[i].attacker.debugSprite );
+		spriteContainer.addChild( enemies[i].moveable.sprite );
+		spriteContainer.addChild( enemies[i].attacker.debugSprite );
 	}
 
 	camera = new vec2( 0, 0 );
 
 	if ( characterMode == "halladay" ) loadHalladay();
 	else loadJamie();
-
 	powerStars = new Array();
 	for ( var i = 0; i < 4; i++ )
 	{
 		powerStars.push( new moveableObject( powerStar.clone(), new vec2(( Math.random() * ( MAXDISTANCE - ( gameEngine.CANVASWIDTH * 2 ) ) ) + gameEngine.CANVASWIDTH, gameEngine.CANVASHEIGHT * Math.random() ) ) );
 		spriteArray.push( powerStars[i] );
 		stageBounds.contain( powerStars[i] );
-		gameEngine.stage.addChild( powerStars[i].sprite );
+		spriteContainer.addChild( powerStars[i].sprite );
 	}
 
+	gameEngine.stage.addChild( spriteContainer );
 	jumpable = true;
 	lastLife = player.life;
 
@@ -1986,6 +2136,8 @@ function level1Init()
 	scoreDisplay.y = scoreText.getMeasuredHeight();
 	gameEngine.stage.addChild( scoreText );
 	gameEngine.stage.addChild( scoreDisplay );
+
+	if ( gameMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) gameMusic.play( { loop: -1 } );
 }
 
 function level1Delete()
@@ -2001,15 +2153,21 @@ function level1Update()
 	bossUpdate();
 	cameraFollowPlayer();
 	moveableObjectsUpdate( spriteArray );
+	collideBullets();
 	updateLife();
 	invisibilityUpdate();
 	scoreDisplay.text = score;
 	scoreDisplay.x = gameEngine.CANVASWIDTH - scoreDisplay.getMeasuredWidth();
-	if ( player.life <= 0 ) gameEngine.mode = "gameover";
+	if ( player.life <= 0 )
+	{
+		gameEngine.mode = "gameover";
+		if ( gameMusic.playState == createjs.Sound.PLAY_SUCCEEDED ) gameMusic.stop();
+	}
 	if ( !boss.moveable.sprite.visible )
 	{
 		gameEngine.mode = "level2";
 	}
+	titleMusic.setMute( mute );
 }
 //#endregion
 
@@ -2496,6 +2654,8 @@ function andrewMain()
 {
 	titleQueue = new Array();
 	titleQueue.push( new createjs.LoadQueue( true, "assets/" ) );
+	createjs.Sound.alternateExtensions = ["mp3"];
+	titleQueue[0].installPlugin( createjs.Sound );
 	titleQueue[0].on( "complete", titleLoaded, this );
 	titleQueue[0].loadManifest( titleManifest );
 	gameEngine.addModeLooper( "title", new gameEngine.updateModeLooper( titleInit, titleDelete, titleUpdate, titleQueue ) );
@@ -2537,6 +2697,7 @@ function andrewMain()
 	gameEngine.addModeLooper( "characterSelect", new gameEngine.updateModeLooper( characterSelectInit, characterSelectDelete, characterSelectUpdate, characterSelectQueue ) );
 
 	mainGameQueue = new createjs.LoadQueue( true, "assets/" );
+	mainGameQueue.installPlugin( createjs.Sound );
 	mainGameQueue.on( "complete", mainGameLoaded, this );
 	mainGameQueue.loadManifest( mainGameManifest );
 
