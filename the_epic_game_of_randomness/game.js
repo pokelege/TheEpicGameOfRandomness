@@ -36,11 +36,11 @@ var gameEngine =
 		this.update = function ()
 		{
 			var notLoaded = false;
-			for ( i = 0; i < this.queues.length; i++ )
+			for ( var i = 0; i < this.queues.length; i++ )
 			{
 				if ( !this.queues[i].loaded ) notLoaded = true;
 			}
-			if ( this.queues != null && notLoaded )
+			if ( notLoaded )
 			{
 				gameEngine.loadingUpdate( this.queues );
 			}
@@ -84,12 +84,35 @@ var gameEngine =
 		}
 	},
 
+	pauseAllQueues: function()
+	{
+		for ( var i = 0; i < gameEngine.updateModeLooperArray.length; i++ )
+		{
+			for ( var j = 0; j < gameEngine.updateModeLooperArray[i].data.queues.length; j++ )
+			{
+				if ( !gameEngine.updateModeLooperArray[i].data.queues[j].loaded ) gameEngine.updateModeLooperArray[i].data.queues[j].setPaused(true);
+			}
+		}
+	},
+
+	startAllQueues: function ()
+	{
+		for ( var i = 0; i < gameEngine.updateModeLooperArray.length; i++ )
+		{
+			for ( var j = 0; j < gameEngine.updateModeLooperArray[i].data.queues.length; j++ )
+			{
+				if ( !gameEngine.updateModeLooperArray[i].data.queues[j].loaded) gameEngine.updateModeLooperArray[i].data.queues[j].setPaused( false );
+			}
+		}
+	},
+
 	//#region loading
 	barBorder: null, progressBar: null, loadingText: null, backgroundColor: null,
 	loadingTextWidth: null,
 	loadingInitialized: false,
 	loadingInit: function ()
 	{
+		//gameEngine.pauseAllQueues();
 		gameEngine.backgroundColor = new createjs.Shape();
 		gameEngine.backgroundColor.graphics.beginFill( "#000" ).drawRect( 0, 0, gameEngine.stage.canvas.width, gameEngine.stage.canvas.height );
 		gameEngine.backgroundColor.x = 0;
@@ -127,10 +150,15 @@ var gameEngine =
 		gameEngine.stage.removeAllChildren();
 		gameEngine.backgroundColor = gameEngine.loadingText = gameEngine.barBorder = gameEngine.progressBar = null;
 		gameEngine.loadingInitialized = false;
+		//gameEngine.startAllQueues();
 	},
 
 	loadingUpdate: function ( queues )
 	{
+		//for ( var j = 0; j < queues.length; j++ )
+		//{
+		//	if(!queues[j].loaded) queues[j].setPaused( false );
+		//}
 		if ( gameEngine.loadingInitialized )
 		{
 			var progress = 0;
@@ -440,10 +468,11 @@ var titleManifest =
 	{ src: "images/playButton.png", id: "playButton" },
 	{ src: "images/instructionsButton.png", id: "instructionsButton" },
 	{ src: "images/creditsButton.png", id: "creditsButton" },
+	{ src: "images/audio.png", id: "audio" },
 	{ src: "audio/InGame.mp3", id: "titleMusic" }
 ];
 var titleQueue;
-var titleScreen, playButton, instructionsButton, creditsButton, titleMusic;
+var titleScreen, playButton, instructionsButton, creditsButton, titleMusic, audio;
 function titleLoaded()
 {
 	titleScreen = new createjs.Bitmap( titleQueue[0].getResult( "title" ) );
@@ -466,6 +495,29 @@ function titleLoaded()
 	creditsButton.x = gameEngine.CANVASWIDTH / 2;
 	creditsButton.y = instructionsButton.getTransformedBounds().height + instructionsButton.y + 5;
 
+
+	var audioSpriteSheet = new createjs.SpriteSheet
+		(
+		{
+			images: [titleQueue[0].getResult( "audio" )],
+			frames:
+				{
+					regX: 0,
+					regY: 40,
+					width: 40,
+					height: 40,
+				},
+			animations:
+				{
+					On: [0, 0],
+					Off:[1,1]
+				}
+		}
+		);
+	audio = new createjs.Sprite( audioSpriteSheet, "On" );
+	audio.y = gameEngine.CANVASHEIGHT;
+	audio.on( "click", function ( evt ) { mute = mute == false; if ( mute ) audio.gotoAndPlay( "Off" ); else audio.gotoAndPlay( "On" ); } )
+
 	titleMusic = new createjs.Sound.createInstance( "titleMusic" );
 	titleMusic.setVolume( 0.50 );
 }
@@ -477,6 +529,7 @@ function titleInit()
 	gameEngine.stage.addChild( instructionsButton );
 	gameEngine.stage.addChild( creditsButton );
 	if ( titleMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) titleMusic.play( { loop: -1 } );
+	gameEngine.stage.addChild( audio );
 }
 function titleDelete()
 {
@@ -505,6 +558,7 @@ function instructionsInit()
 	gameEngine.stage.addChild( instructions );
 	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "title"; } );
 	if ( titleMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) titleMusic.play( { loop: -1 } );
+	gameEngine.stage.addChild( audio );
 }
 
 function instructionsDelete()
@@ -535,6 +589,7 @@ function creditsInit()
 	gameEngine.stage.addChild( credits );
 	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "title"; } );
 	if ( titleMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) titleMusic.play( { loop: -1 } );
+	gameEngine.stage.addChild( audio );
 }
 
 function creditsDelete()
@@ -551,29 +606,35 @@ function creditsUpdate()
 //#region gameover
 var gameoverManifest =
 	[
-		{ src: "images/gameover.jpg", id: "gameover" }
+		{ src: "images/gameover.jpg", id: "gameover" },
+		{src:"audio/gameOver.mp3", id:"gameOverMusic"}
 	];
 var gameoverQueue;
-var gameover;
+var gameover, gameOverMusic;
 function gameoverLoaded()
 {
 	gameover = new createjs.Bitmap( gameoverQueue[0].getResult( "gameover" ) );
+	gameOverMusic = new createjs.Sound.createInstance( "gameOverMusic" );
 }
 
 function gameoverInit()
 {
 	gameEngine.stage.addChild( gameover );
 	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "title"; } );
+	gameOverMusic.play();
+	gameOverMusic.setMute( mute );
+	gameEngine.stage.addChild( audio );
 }
 
 function gameoverDelete()
 {
 	gameEngine.stage.removeAllChildren();
 	gameEngine.stage.removeAllEventListeners();
+	gameOverMusic.stop();
 }
 function gameoverUpdate()
 {
-
+	gameOverMusic.setMute( mute );
 }
 //#endregion
 
@@ -593,6 +654,7 @@ function winInit()
 {
 	gameEngine.stage.addChild( win );
 	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "credits"; } );
+	gameEngine.stage.addChild( audio );
 }
 
 function winDelete()
@@ -622,6 +684,7 @@ function trueWinInit()
 {
 	gameEngine.stage.addChild( trueWin );
 	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "credits"; } );
+	gameEngine.stage.addChild( audio );
 }
 
 function trueWinDelete()
@@ -664,6 +727,7 @@ function ( evt )
 	easterEggs = null;
 } );
 	if ( titleMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) titleMusic.play( { loop: -1 } );
+	gameEngine.stage.addChild( audio );
 }
 
 function characterSelectDelete()
@@ -1726,6 +1790,7 @@ var MAXLIFE = 100;
 
 var jumpable;
 var MAXJUMPHEIGHT = -100;
+var primaryBuffer = false;
 function playerMovement()
 {
 	var posToAdd = new vec2( 0, 0 );
@@ -1774,10 +1839,12 @@ function playerMovement()
 		}
 	}
 
-	if ( ( gameEngine.ZPressed || gameEngine.IPressed || gameEngine.XPressed || gameEngine.OPressed ) && player.moveable.sprite.currentAnimation != "Attack1") //&& player.moveable.airDistance === 0 )
+	if ( !primaryBuffer && ( gameEngine.ZPressed || gameEngine.IPressed || gameEngine.XPressed || gameEngine.OPressed ) && player.moveable.sprite.currentAnimation != "Attack1" ) //&& player.moveable.airDistance === 0 )
 	{
 		player.moveable.sprite.gotoAndPlay( "Attack1" );
+		primaryBuffer = true;
 	}
+	else if ( !( gameEngine.ZPressed || gameEngine.IPressed || gameEngine.XPressed || gameEngine.OPressed ) ) primaryBuffer = false;
 
 	if ( posToAdd.equals( new vec2( 0, 0 ) ) )
 	{
@@ -1820,11 +1887,14 @@ function playerMovement()
 	}
 	stageBounds.contain( player.moveable );
 
-	if ( gameEngine.JamiePressed || gameEngine.TomPressed )
+	if ( !tomBuffer && gameEngine.TomPressed )
 	{
-		invisibleTimeLeft = INVISIBLETIME;
+		tomMode = tomMode == false;
+		tomBuffer = true;
 	}
+	else if ( !gameEngine.TomPressed ) tomBuffer = false;
 
+	if ( gameEngine.JamiePressed ) punishJamie();
 	for ( var i = 0; i < powerStars.length; i++ )
 	{
 		if ( powerStars[i].sprite.visible )
@@ -1851,6 +1921,21 @@ function playerMovement()
 	player.attacker.update();
 }
 
+var tomBuffer = false;
+var tomMode = false;
+
+
+function punishJamie()
+{
+	for ( var i = 0; i < enemies.length; i++ )
+	{
+		if ( !enemies[i].moveable.sprite.visible )
+		{
+			enemies[i].moveable.sprite.visible = true;
+			enemies[i].life = 5;
+		}
+	}
+}
 function playerAttack()
 {
 	player.attacker.update();
@@ -1891,7 +1976,6 @@ function playerAttack()
 			}
 			else
 			{
-
 				updateTarget( boss );
 			}
 		}
@@ -2190,6 +2274,7 @@ function updateTarget( newTarget )
 	}
 	else
 	{
+		enemyTarget = null;
 		if ( enemyLifeIcon )
 		{
 			enemyLifeIcon.visible = false;
@@ -2203,6 +2288,10 @@ var INVISIBLETIME = 3;
 
 function invisibilityUpdate()
 {
+	if ( tomMode )
+	{
+		invisibleTimeLeft = INVISIBLETIME;
+	}
 	if ( invisibleTimeLeft > 0 )
 	{
 		invisibleTimeLeft -= gameEngine.DT;
@@ -2349,7 +2438,7 @@ function level1Init()
 	enemies = new Array();
 	for ( var i = 0; i < 10; i++ )
 	{
-		enemies.push( new moveableAttacker( new moveableObject( level1Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - ( gameEngine.CANVASWIDTH * 2 ) ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level1Enemy.getTransformedBounds().width / 8, -level1Enemy.getTransformedBounds().height * 0.9, 50, level1Enemy.getTransformedBounds().height / 2 ), 3 ) );
+		enemies.push( new moveableAttacker( new moveableObject( level1Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - ( gameEngine.CANVASWIDTH * 2 ) ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level1Enemy.getTransformedBounds().width / 8, -level1Enemy.getTransformedBounds().height * 0.9, 50, level1Enemy.getTransformedBounds().height / 2 ), 1 ) );
 		enemies[i].attacker.characterSprite = enemies[i].moveable.sprite;
 		//enemies[i].attacker.debugSprite = pixel.clone();
 		//enemies[i].attacker.debugSprite.visible = true;
@@ -2424,6 +2513,7 @@ function level1Init()
 	level1Music.play( { loop: -1 } );
 	level1Music.setMute( mute );
 	enemyTarget = null;
+	gameEngine.stage.addChild( audio );
 }
 
 function level1Delete()
@@ -2503,7 +2593,7 @@ function level2Init()
 	enemies = new Array();
 	for ( var i = 0; i < 30; i++ ) //30
 	{
-		enemies.push( new moveableAttacker( new moveableObject( level2Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level2Enemy.getTransformedBounds().width / 8, -level2Enemy.getTransformedBounds().height * 0.9, 50, level2Enemy.getTransformedBounds().height / 2 ), 3 ) );
+		enemies.push( new moveableAttacker( new moveableObject( level2Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level2Enemy.getTransformedBounds().width / 8, -level2Enemy.getTransformedBounds().height * 0.9, 50, level2Enemy.getTransformedBounds().height / 2 ), 2 ) );
 		enemies[i].attacker.characterSprite = enemies[i].moveable.sprite;
 		//enemies[i].attacker.debugSprite = pixel.clone();
 		//enemies[i].attacker.debugSprite.visible = true;
@@ -2580,6 +2670,7 @@ function level2Init()
 	level2Music.play( { loop: -1 } );
 	level2Music.setMute( mute );
 	enemyTarget = null;
+	gameEngine.stage.addChild( audio );
 }
 
 function level2Delete()
@@ -2736,6 +2827,7 @@ function level3Init()
 	level3Music.play( { loop: -1 } );
 	level3Music.setMute( mute );
 	enemyTarget = null;
+	gameEngine.stage.addChild( audio );
 }
 
 function level3Delete()
@@ -2817,7 +2909,7 @@ function level4Init()
 	enemies = new Array();
 	for ( var i = 0; i < 75; i++ )
 	{
-		enemies.push( new moveableAttacker( new moveableObject( level4Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level4Enemy.getTransformedBounds().width / 5, -level4Enemy.getTransformedBounds().height * 0.8, 40, level4Enemy.getTransformedBounds().height / 2 ), 3 ) );
+		enemies.push( new moveableAttacker( new moveableObject( level4Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level4Enemy.getTransformedBounds().width / 5, -level4Enemy.getTransformedBounds().height * 0.8, 40, level4Enemy.getTransformedBounds().height / 2 ), 4 ) );
 		enemies[i].attacker.characterSprite = enemies[i].moveable.sprite;
 		//enemies[i].attacker.debugSprite = pixel.clone();
 		//enemies[i].attacker.debugSprite.visible = true;
@@ -2897,6 +2989,7 @@ function level4Init()
 	level4Music.play( { loop: -1 } );
 	level4Music.setMute( mute );
 	enemyTarget = null;
+	gameEngine.stage.addChild( audio );
 }
 
 function level4Delete()
@@ -2995,7 +3088,7 @@ function level5Init()
 	enemies = new Array();
 	for ( var i = 0; i < 100; i++ )
 	{
-		enemies.push( new moveableAttacker( new moveableObject( level5Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level5Enemy.getTransformedBounds().width * 0.15, -level5Enemy.getTransformedBounds().height, level5Enemy.getTransformedBounds().width * 0.55, level5Enemy.getTransformedBounds().height * 0.6 ), 3 ) );
+		enemies.push( new moveableAttacker( new moveableObject( level5Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level5Enemy.getTransformedBounds().width * 0.15, -level5Enemy.getTransformedBounds().height, level5Enemy.getTransformedBounds().width * 0.55, level5Enemy.getTransformedBounds().height * 0.6 ), 5 ) );
 		enemies[i].attacker.characterSprite = enemies[i].moveable.sprite;
 		//enemies[i].attacker.debugSprite = pixel.clone();
 		//enemies[i].attacker.debugSprite.visible = true;
@@ -3075,6 +3168,7 @@ function level5Init()
 	level5Music.play( { loop: -1 } );
 	level5Music.setMute( mute );
 	enemyTarget = null;
+	gameEngine.stage.addChild( audio );
 }
 
 function level5Delete()
