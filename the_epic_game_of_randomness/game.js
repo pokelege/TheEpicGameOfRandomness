@@ -519,7 +519,6 @@ function titleLoaded()
 	audio.on( "click", function ( evt ) { mute = mute == false; if ( mute ) audio.gotoAndPlay( "Off" ); else audio.gotoAndPlay( "On" ); } )
 
 	titleMusic = new createjs.Sound.createInstance( "titleMusic" );
-	titleMusic.setVolume( 0.50 );
 }
 
 function titleInit()
@@ -726,7 +725,7 @@ function ( evt )
 	if ( evt.stageX < gameEngine.CANVASWIDTH / 2 )
 		characterMode = "jamie";
 	else characterMode = "halladay";
-	gameEngine.mode = "level1";
+	gameEngine.mode = "level5";
 	if ( titleMusic.playState == createjs.Sound.PLAY_SUCCEEDED )
 		titleMusic.stop();
 	score = null;
@@ -761,13 +760,14 @@ var mainGameManifest =
 		{ src: "images/powerStar.png", id: "powerStar" },
 		{ src: "images/easterEgg.png", id: "easterEgg" },
 		{ src: "images/pixel.png", id: "pixel" },
+		{ src: "images/circleExplosion.png", id: "circleExplosion"},
 		{ src: "audio/boss.mp3", id: "mainBossMusic" },
 		{ src: "audio/playerHit.mp3", id: "mainPlayerHit" },
 		{ src: "audio/enemyHit.mp3", id: "mainEnemyHit" },
 		{ src: "audio/playerScream.mp3", id: "mainPlayerDie" },
 		{ src: "audio/enemyScream.mp3", id: "mainEnemyDie" },
 	];
-var mainGameQueue, jamieChara, jamieIcon, halladayChara, halladayIcon, pixel, healthBar, powerStar, easterEgg, mainBossMusic, mainPlayerHit, mainEnemyHit, mainPlayerDie, mainEnemyDie;
+var mainGameQueue, jamieChara, jamieIcon, halladayChara, halladayIcon, pixel, healthBar, powerStar, easterEgg, mainBossMusic, mainPlayerHit, mainEnemyHit, mainPlayerDie, mainEnemyDie, circleExplosion;
 
 var Level1Manifest =
 	[
@@ -912,6 +912,21 @@ function mainGameLoaded()
 		halladayIcon.scaleY = 64 / halladayIcon.getBounds().height;
 	}
 
+	var circleExplosionSheet = new createjs.SpriteSheet
+(
+	{
+		images: [mainGameQueue.getResult( "circleExplosion" )],
+		frames: [[0, 0, 21, 21, 0, 26.950000000000003, 6.950000000000003], [21, 0, 31, 31, 0, 31.950000000000003, 11.950000000000003], [52, 0, 41, 41, 0, 36.95, 16.950000000000003], [93, 0, 53, 53, 0, 42.95, 22.950000000000003], [146, 0, 63, 63, 0, 47.95, 27.950000000000003], [209, 0, 73, 73, 0, 52.95, 32.95], [282, 0, 85, 85, 0, 58.95, 38.95], [367, 0, 95, 95, 0, 63.95, 43.95], [0, 95, 107, 106, 0, 69.95, 49.95], [107, 95, 117, 117, 0, 74.95, 54.95], [224, 95, 127, 127, 0, 79.95, 59.95], [351, 95, 139, 139, 0, 85.95, 65.95], [0, 234, 149, 149, 0, 90.95, 70.95], [149, 234, 161, 160, 0, 96.95, 76.95], [310, 234, 171, 171, 0, 101.95, 81.95]],
+		animations:
+			{
+				Normal: [0, 14, false]
+			}
+	}
+);
+
+	circleExplosion = new createjs.Sprite( circleExplosionSheet, "Normal" );
+	
+
 	var fpsBarSheet = new createjs.SpriteSheet
 		(
 		{
@@ -1017,7 +1032,18 @@ function level1Loaded()
 		animations:
 			{
 				Neutral: [0, 0],
-				Die: [1, 9, false]
+				Run:
+				{
+					frames: [0, 2],
+					next: "Neutral",
+					speed: 0.25
+				},
+				Attack1:
+				{
+					frames: [1],
+					next: "Neutral",
+					speed: 0.25
+				}
 			}
 	}
 	);
@@ -1126,7 +1152,18 @@ function level2Loaded()
 		animations:
 			{
 				Neutral: [0, 0],
-				Die: [1, 9, false]
+				Run:
+				{
+					frames: [0, 2],
+					next: "Neutral",
+					speed: 0.25
+				},
+				Attack1:
+				{
+					frames: [1],
+					next: "Neutral",
+					speed: 0.25
+				}
 			}
 	}
 	);
@@ -1224,7 +1261,18 @@ function level3Loaded()
 		animations:
 			{
 				Neutral: [0, 0],
-				Die: [1, 9, false]
+				Run:
+				{
+					frames: [0, 2],
+					next: "Neutral",
+					speed: 0.25
+				},
+				Attack1:
+				{
+					frames: [1],
+					next: "Neutral",
+					speed: 0.25
+				}
 			}
 	}
 	);
@@ -1322,7 +1370,18 @@ function level4Loaded()
 		animations:
 			{
 				Neutral: [0, 0],
-				Die: [1, 9, false]
+				Run:
+				{
+					frames: [0, 2],
+					next: "Neutral",
+					speed: 0.25
+				},
+				Attack1:
+				{
+					frames: [1],
+					next: "Neutral",
+					speed: 0.25
+				}
 			}
 	}
 	);
@@ -1432,7 +1491,18 @@ function level5Loaded()
 		animations:
 			{
 				Neutral: [0, 0],
-				Die: [1, 9, false]
+				Run:
+				{
+					frames: [0, 2],
+					next: "Neutral",
+					speed: 0.25
+				},
+				Attack1:
+				{
+					frames: [1],
+					next: "Neutral",
+					speed: 0.25
+				}
 			}
 	}
 	);
@@ -1990,6 +2060,7 @@ function playerAttack()
 				if ( enemies[i].life <= 0 )
 				{
 					score += 100;
+					addExplosion( new vec2( enemies[i].moveable.position.x, enemies[i].moveable.position.y - ( enemies[i].moveable.sprite.getTransformedBounds().height * 0.5 ) ) );
 					if ( enemyDie ) enemyDie.play();
 					enemies[i].moveable.sprite.visible = false;
 					updateTarget( null );
@@ -1999,7 +2070,7 @@ function playerAttack()
 		}
 	}
 
-	if ( boss.moveable.sprite.visible && boss.moveable.sprite.currentAnimation != "Die" )
+	if ( boss.moveable.sprite.visible)
 	{
 		var collided = player.attacker.collideSprite( boss.moveable.sprite );
 
@@ -2007,10 +2078,11 @@ function playerAttack()
 		{
 			if ( playerHit ) playerHit.play();
 			boss.life -= 1;
-			if ( boss.life <= 0 && boss.moveable.sprite.currentAnimation != "Die" )
+			if ( boss.life <= 0 )
 			{
 				score += 9001
-				boss.moveable.sprite.gotoAndPlay( "Die" );
+				addExplosion( new vec2( boss.moveable.position.x, boss.moveable.position.y - ( boss.moveable.sprite.getTransformedBounds().height * 0.5 ) ) );
+				boss.moveable.sprite.visible = false;
 				if ( bossDie ) bossDie.play();
 				updateTarget( null );
 			}
@@ -2077,7 +2149,6 @@ function enemyAttack( enemySprite )
 	{
 		if ( enemies[i].moveable.sprite == enemySprite )
 		{
-			//enemies[i].attacker.debugSprite.visible = true;
 			if ( invisibleTimeLeft <= 0 && enemies[i].attacker.collideSprite( player.moveable.sprite ) )
 			{
 				if ( enemyHit ) enemyHit.play();
@@ -2089,7 +2160,7 @@ function enemyAttack( enemySprite )
 
 function bossUpdate()
 {
-	if ( boss.moveable.sprite.visible && boss.moveable.sprite.currentAnimation != "Die" )
+	if ( boss.moveable.sprite.visible )
 	{
 		boss.attacker.update();
 		var distance = boss.moveable.position.subtract( player.moveable.position ).length()
@@ -2097,7 +2168,6 @@ function bossUpdate()
 		{
 			if ( bossMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) bossMusic.play();
 			if ( levelMusic.playState == createjs.Sound.PLAY_SUCCEEDED ) levelMusic.stop( { loop: -1 } );
-			boss.attacker.debugSprite.visible = false;
 			moveToPlayer( boss.moveable );
 
 			if ( boss.moveable.facing == "right" )
@@ -2125,23 +2195,19 @@ function bossUpdate()
 				}
 			}
 		}
-		else if ( distance < gameEngine.CANVASWIDTH * 1.25 && Math.random() <= 0.25 )
+		else if ( distance < gameEngine.CANVASWIDTH * 1.25 && Math.random() <= 0.25 && boss.moveable.sprite.currentAnimation != "Attack1" )
 		{
-			boss.attacker.debugSprite.visible = true;
-			if ( invisibleTimeLeft <= 0 && boss.attacker.collideSprite( player.moveable.sprite ) )
-			{
-				if ( bossHit ) bossHit.play();
-				player.life -= 0.5;
-			}
-		}
-		else
-		{
-			boss.attacker.debugSprite.visible = false;
+			boss.moveable.sprite.gotoAndPlay( "Attack1" );
 		}
 	}
-	else
+}
+
+function bossAttack()
+{
+	if ( invisibleTimeLeft <= 0 && boss.attacker.collideSprite( player.moveable.sprite ) )
 	{
-		boss.attacker.debugSprite.visible = false;
+		if ( bossHit ) bossHit.play();
+		player.life -= 0.5;
 	}
 }
 
@@ -2452,6 +2518,22 @@ function showLevelFrame()
 	animated = false;
 }
 
+var circleExplosionParticleArray;
+function addExplosion( pos )
+{
+	for ( var i = 0; i < circleExplosionParticleArray.length; i++ )
+	{
+		if ( !circleExplosionParticleArray[i].sprite.visible )
+		{
+			circleExplosionParticleArray[i].position = pos;
+			circleExplosionParticleArray[i].sprite.gotoAndPlay( "Normal" );
+			circleExplosionParticleArray[i].sprite.visible = true;
+			circleExplosionParticleArray[i].sprite.x = circleExplosionParticleArray[i].position.x - camera.x;
+			circleExplosionParticleArray[i].sprite.y = circleExplosionParticleArray[i].position.y + circleExplosionParticleArray[i].airDistance - camera.y;
+			break;
+		}
+	}
+}
 var levelMusic, bossMusic;
 var playerDie, enemyDie, bossDie, playerHit, enemyHit, bossHit;
 //#region level1
@@ -2499,7 +2581,7 @@ function level1Init()
 	boss.icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height - 5;
 	boss.attacker.characterSprite = boss.moveable.sprite;
 	boss.attacker.debugSprite = pixel.clone();
-	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
+	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Attack1" ) bossAttack(); } );
 	spriteArray.push( boss.moveable );
 	stageBounds.contain( boss.moveable );
 	spriteContainer.addChild( boss.moveable.sprite );
@@ -2539,6 +2621,15 @@ function level1Init()
 	}
 
 	gameEngine.stage.addChild( spriteContainer );
+	circleExplosionParticleArray = new Array();
+	for ( var i = 0; i < 100; i++ )
+	{
+		circleExplosionParticleArray.push( new moveableObject( circleExplosion.clone(), new vec2( 0, 0 ), 0 ) );
+		circleExplosionParticleArray[i].sprite.on( "animationend", function ( evt ) { evt.target.visible = false; } );
+		circleExplosionParticleArray[i].sprite.visible = false;
+		spriteArray.push( circleExplosionParticleArray[i] );
+		gameEngine.stage.addChild( circleExplosionParticleArray[i].sprite );
+	}
 	jumpable = true;
 	lastLife = player.life;
 
@@ -2629,6 +2720,7 @@ function level1Update()
 		if ( player.life <= 0 )
 		{
 			playerDie.play();
+			addExplosion( new vec2( player.moveable.position.x, player.moveable.position.y - ( player.moveable.sprite.getTransformedBounds().height * 0.5 ) ) );
 			player.moveable.sprite.visible = false;
 			gameEngine.mode = "gameover";
 		}
@@ -2637,8 +2729,8 @@ function level1Update()
 			gameEngine.mode = "level2";
 		}
 	}
-			cameraFollowPlayer();
-		moveableObjectsUpdate( spriteArray );
+	cameraFollowPlayer();
+	moveableObjectsUpdate( spriteArray );
 	updateLife();
 	scoreDisplay.text = score;
 	scoreDisplay.x = gameEngine.CANVASWIDTH - scoreDisplay.getMeasuredWidth();
@@ -2686,7 +2778,7 @@ function level2Init()
 	stageBounds.contain( boss.moveable );
 	boss.attacker.characterSprite = boss.moveable.sprite;
 	boss.attacker.debugSprite = pixel.clone();
-	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
+	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Attack1" ) bossAttack(); } );
 	spriteArray.push( boss.moveable );
 	spriteContainer.addChild( boss.moveable.sprite );
 	spriteContainer.addChild( boss.attacker.debugSprite );
@@ -2725,6 +2817,15 @@ function level2Init()
 	}
 	gameEngine.stage.addChild( spriteContainer );
 
+	circleExplosionParticleArray = new Array(); 
+	for ( var i = 0; i < 100; i++ )
+	{
+		circleExplosionParticleArray.push( new moveableObject( circleExplosion.clone(), new vec2( 0, 0 ), 0 ) );
+		circleExplosionParticleArray[i].sprite.on( "animationend", function ( evt ) { evt.target.visible = false; } );
+		circleExplosionParticleArray[i].sprite.visible = false;
+		spriteArray.push( circleExplosionParticleArray[i] );
+		gameEngine.stage.addChild( circleExplosionParticleArray[i].sprite );
+	}
 	jumpable = true;
 	lastLife = player.life;
 
@@ -2816,6 +2917,7 @@ function level2Update()
 
 		if ( player.life <= 0 )
 		{
+			addExplosion( new vec2( player.moveable.position.x, player.moveable.position.y - ( player.moveable.sprite.getTransformedBounds().height * 0.5 ) ) );
 			playerDie.play();
 			player.moveable.sprite.visible = false;
 			gameEngine.mode = "gameover";
@@ -2874,7 +2976,7 @@ function level3Init()
 	stageBounds.contain( boss.moveable );
 	boss.attacker.characterSprite = boss.moveable.sprite;
 	boss.attacker.debugSprite = pixel.clone();
-	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
+	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Attack1" ) bossAttack(); } );
 	spriteArray.push( boss.moveable );
 	spriteContainer.addChild( boss.moveable.sprite );
 	spriteContainer.addChild( boss.attacker.debugSprite );
@@ -2912,8 +3014,17 @@ function level3Init()
 		stageBounds.contain( powerStars[i] );
 		spriteContainer.addChild( powerStars[i].sprite );
 	}
-	gameEngine.stage.addChild( spriteContainer );
 
+	gameEngine.stage.addChild( spriteContainer );
+	circleExplosionParticleArray = new Array();
+	for ( var i = 0; i < 100; i++ )
+	{
+		circleExplosionParticleArray.push( new moveableObject( circleExplosion.clone(), new vec2( 0, 0 ), 0 ) );
+		circleExplosionParticleArray[i].sprite.on( "animationend", function ( evt ) { evt.target.visible = false; } );
+		circleExplosionParticleArray[i].sprite.visible = false;
+		spriteArray.push( circleExplosionParticleArray[i] );
+		gameEngine.stage.addChild( circleExplosionParticleArray[i].sprite );
+	}
 	jumpable = true;
 	lastLife = player.life;
 
@@ -3004,6 +3115,7 @@ function level3Update()
 		invisibilityUpdate();
 		if ( player.life <= 0 )
 		{
+			addExplosion( new vec2( player.moveable.position.x, player.moveable.position.y - ( player.moveable.sprite.getTransformedBounds().height * 0.5 ) ) );
 			playerDie.play();
 			player.moveable.sprite.visible = false;
 			gameEngine.mode = "gameover";
@@ -3067,7 +3179,7 @@ function level4Init()
 
 	boss.attacker.characterSprite = boss.moveable.sprite;
 	boss.attacker.debugSprite = pixel.clone();
-	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
+	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Attack1" ) bossAttack(); } );
 	spriteArray.push( boss.moveable );
 	spriteContainer.addChild( boss.moveable.sprite );
 	spriteContainer.addChild( boss.attacker.debugSprite );
@@ -3107,8 +3219,17 @@ function level4Init()
 		stageBounds.contain( powerStars[i] );
 		spriteContainer.addChild( powerStars[i].sprite );
 	}
-	gameEngine.stage.addChild( spriteContainer );
 
+	gameEngine.stage.addChild( spriteContainer );
+	circleExplosionParticleArray = new Array();
+	for ( var i = 0; i < 100; i++ )
+	{
+		circleExplosionParticleArray.push( new moveableObject( circleExplosion.clone(), new vec2( 0, 0 ), 0 ) );
+		circleExplosionParticleArray[i].sprite.on( "animationend", function ( evt ) { evt.target.visible = false; } );
+		circleExplosionParticleArray[i].sprite.visible = false;
+		spriteArray.push( circleExplosionParticleArray[i] );
+		gameEngine.stage.addChild( circleExplosionParticleArray[i].sprite );
+	}
 	jumpable = true;
 	lastLife = player.life;
 
@@ -3200,6 +3321,7 @@ function level4Update()
 
 		if ( player.life <= 0 )
 		{
+			addExplosion( new vec2( player.moveable.position.x, player.moveable.position.y - ( player.moveable.sprite.getTransformedBounds().height * 0.5 ) ) );
 			playerDie.play();
 			player.moveable.sprite.visible = false;
 			gameEngine.mode = "gameover";
@@ -3278,7 +3400,7 @@ function level5Init()
 
 	boss.attacker.characterSprite = boss.moveable.sprite;
 	boss.attacker.debugSprite = pixel.clone();
-	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Die" ) evt.target.visible = false; } );
+	boss.moveable.sprite.on( "animationend", function ( evt ) {if ( evt.name == "Attack1" ) bossAttack(); } );
 	spriteArray.push( boss.moveable );
 	spriteContainer.addChild( boss.moveable.sprite );
 	spriteContainer.addChild( boss.attacker.debugSprite );
@@ -3290,7 +3412,10 @@ function level5Init()
 		//enemies[i].attacker.debugSprite = pixel.clone();
 		//enemies[i].attacker.debugSprite.visible = true;
 		enemies[i].moveable.sprite.on( "animationend",
-		function ( evt ) { if ( evt.name == "Attack1" ) enemyAttack( evt.target ); }
+		function ( evt )
+		{
+			if ( evt.name == "Attack1" ) enemyAttack( evt.target );
+		}
 		);
 		stageBounds.contain( enemies[i].moveable );
 		enemies[i].icon = level5EnemyIcon.clone();
@@ -3318,7 +3443,15 @@ function level5Init()
 	}
 
 	gameEngine.stage.addChild( spriteContainer );
-
+	circleExplosionParticleArray = new Array();
+	for ( var i = 0; i < 100; i++ )
+	{
+		circleExplosionParticleArray.push( new moveableObject( circleExplosion.clone(), new vec2( 0, 0 ), 0 ) );
+		circleExplosionParticleArray[i].sprite.on( "animationend", function ( evt ) { evt.target.visible = false; } );
+		circleExplosionParticleArray[i].sprite.visible = false;
+		spriteArray.push( circleExplosionParticleArray[i] );
+		gameEngine.stage.addChild( circleExplosionParticleArray[i].sprite );
+	}
 	jumpable = true;
 	lastLife = player.life;
 
@@ -3411,6 +3544,7 @@ function level5Update()
 
 		if ( player.life <= 0 )
 		{
+			addExplosion( new vec2( player.moveable.position.x, player.moveable.position.y - ( player.moveable.sprite.getTransformedBounds().height * 0.5 ) ) );
 			playerDie.play();
 			player.moveable.sprite.visible = false;
 			gameEngine.mode = "gameover";
