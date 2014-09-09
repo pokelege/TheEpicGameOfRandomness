@@ -1451,7 +1451,7 @@ function level5Loaded()
 	level5BossIntroMusic = new createjs.Sound.createInstance( "level5BossIntroMusic" );
 	level5BossIntroMusic.addEventListener( "complete", function ( evt )
 	{
-		level5BossIntoMusic.stop();
+		level5BossIntroMusic.stop();
 		bossMusic = level5BossMusic;
 		bossMusic.play( { loop: -1 } );
 		bossMusic.setMute( mute );
