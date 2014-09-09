@@ -477,7 +477,7 @@ function titleLoaded()
 {
 	titleScreen = new createjs.Bitmap( titleQueue[0].getResult( "title" ) );
 	playButton = new createjs.Bitmap( titleQueue[0].getResult( "playButton" ) );
-	playButton.on( "click", function ( evt ) { gameEngine.mode = "characterSelect"; } );
+	playButton.on( "click", function ( evt ) { gameEngine.mode = "characterSelect"; titleMusic.stop(); } );
 	playButton.regX = playButton.getBounds().width / 2;
 	playButton.regY = playButton.getBounds().height / 2;
 	playButton.x = gameEngine.CANVASWIDTH / 2;
@@ -490,7 +490,7 @@ function titleLoaded()
 	instructionsButton.y = playButton.getTransformedBounds().height + playButton.y + 5;
 
 	creditsButton = new createjs.Bitmap( titleQueue[0].getResult( "creditsButton" ) );
-	creditsButton.on( "click", function ( evt ) { gameEngine.mode = "credits"; } );
+	creditsButton.on( "click", function ( evt ) { gameEngine.mode = "credits"; titleMusic.stop(); } );
 	creditsButton.regX = creditsButton.getBounds().width / 2;
 	creditsButton.x = gameEngine.CANVASWIDTH / 2;
 	creditsButton.y = instructionsButton.getTransformedBounds().height + instructionsButton.y + 5;
@@ -575,20 +575,23 @@ function instructionsUpdate()
 //#region credits
 var creditsManifest =
 	[
-		{ src: "images/credits.jpg", id: "credits" }
+		{ src: "images/credits.jpg", id: "credits" },
+		{ src: "audio/credits.mp3", id: "creditsMusic" }
 	];
 var creditsQueue;
-var credits;
+var credits, creditsMusic;
 function creditsLoaded()
 {
 	credits = new createjs.Bitmap( creditsQueue[0].getResult( "credits" ) );
+	creditsMusic = new createjs.Sound.createInstance( "creditsMusic" );
 }
 
 function creditsInit()
 {
 	gameEngine.stage.addChild( credits );
 	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "title"; } );
-	if ( titleMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) titleMusic.play( { loop: -1 } );
+	creditsMusic.play( { loop: -1 } );
+	creditsMusic.setMute( mute );
 	gameEngine.stage.addChild( audio );
 }
 
@@ -596,10 +599,11 @@ function creditsDelete()
 {
 	gameEngine.stage.removeAllChildren();
 	gameEngine.stage.removeAllEventListeners();
+	creditsMusic.stop();
 }
 function creditsUpdate()
 {
-	titleMusic.setMute( mute );
+	creditsMusic.setMute( mute );
 }
 //#endregion
 
@@ -701,14 +705,16 @@ function trueWinUpdate()
 //#region characterSelect
 var characterSelectManifest =
 	[
-		{ src: "images/characterSelect.png", id: "characterSelect" }
+		{ src: "images/characterSelect.png", id: "characterSelect" },
+		{ src: "audio/characterSelect.mp3", id: "characterSelectMusic" }
 	];
 var characterSelectQueue;
-var characterSelect;
+var characterSelect, characterSelectMusic;
 var characterMode = "jamie";
 function characterSelectLoaded()
 {
 	characterSelect = new createjs.Bitmap( characterSelectQueue[0].getResult( "characterSelect" ) );
+	characterSelectMusic = new createjs.Sound.createInstance( "characterSelectMusic" );
 }
 
 function characterSelectInit()
@@ -726,7 +732,8 @@ function ( evt )
 	score = null;
 	easterEggs = null;
 } );
-	if ( titleMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) titleMusic.play( { loop: -1 } );
+	characterSelectMusic.play( { loop: -1 } );
+	characterSelectMusic.setMute( mute );
 	gameEngine.stage.addChild( audio );
 }
 
@@ -734,10 +741,11 @@ function characterSelectDelete()
 {
 	gameEngine.stage.removeAllChildren();
 	gameEngine.stage.removeAllEventListeners();
+	characterSelectMusic.stop();
 }
 function characterSelectUpdate()
 {
-	titleMusic.setMute( mute );
+	characterSelectMusic.setMute( mute );
 }
 //#endregion
 
@@ -3233,6 +3241,7 @@ function andrewMain()
 
 	creditsQueue = new Array();
 	creditsQueue.push( new createjs.LoadQueue( true, "assets/" ) );
+	creditsQueue[0].installPlugin( createjs.Sound );
 	creditsQueue[0].on( "complete", creditsLoaded, this );
 	creditsQueue[0].loadManifest( creditsManifest );
 	gameEngine.addModeLooper( "credits", new gameEngine.updateModeLooper( creditsInit, creditsDelete, creditsUpdate, creditsQueue ) );
@@ -3258,6 +3267,7 @@ function andrewMain()
 
 	characterSelectQueue = new Array();
 	characterSelectQueue.push( new createjs.LoadQueue( true, "assets/" ) );
+	characterSelectQueue[0].installPlugin( createjs.Sound );
 	characterSelectQueue[0].on( "complete", characterSelectLoaded, this );
 	characterSelectQueue[0].loadManifest( characterSelectManifest );
 	gameEngine.addModeLooper( "characterSelect", new gameEngine.updateModeLooper( characterSelectInit, characterSelectDelete, characterSelectUpdate, characterSelectQueue ) );
