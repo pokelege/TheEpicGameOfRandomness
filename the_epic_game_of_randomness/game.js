@@ -761,9 +761,13 @@ var mainGameManifest =
 		{ src: "images/powerStar.png", id: "powerStar" },
 		{ src: "images/easterEgg.png", id: "easterEgg" },
 		{ src: "images/pixel.png", id: "pixel" },
-		{src: "audio/boss.mp3", id: "mainBossMusic"}
+		{ src: "audio/boss.mp3", id: "mainBossMusic" },
+		{ src: "audio/playerHit.mp3", id: "mainPlayerHit" },
+		{ src: "audio/enemyHit.mp3", id: "mainEnemyHit" },
+		{ src: "audio/playerScream.mp3", id: "mainPlayerDie" },
+		{ src: "audio/enemyScream.mp3", id: "mainEnemyDie" },
 	];
-var mainGameQueue, jamieChara, jamieIcon, halladayChara, halladayIcon, pixel, healthBar, powerStar, easterEgg, mainBossMusic;
+var mainGameQueue, jamieChara, jamieIcon, halladayChara, halladayIcon, pixel, healthBar, powerStar, easterEgg, mainBossMusic, mainPlayerHit, mainEnemyHit, mainPlayerDie, mainEnemyDie;
 
 var Level1Manifest =
 	[
@@ -939,7 +943,11 @@ function mainGameLoaded()
 	pixel = new createjs.Bitmap( mainGameQueue.getResult( "pixel" ) );
 
 	mainBossMusic = new createjs.Sound.createInstance( "mainBossMusic" );
-	mainBossMusic.addEventListener( "complete", function ( evt ) { bossMusic.play( { loop: -1 } );});
+	mainBossMusic.addEventListener( "complete", function ( evt ) { bossMusic.play( { loop: -1 } ); } );
+	mainPlayerHit = new createjs.Sound.createInstance( "mainPlayerHit" );
+	mainEnemyHit = new createjs.Sound.createInstance( "mainEnemyHit" );
+	mainPlayerDie = new createjs.Sound.createInstance( "mainPlayerDie" );
+	mainEnemyDie = new createjs.Sound.createInstance( "mainEnemyDie" );
 }
 
 function level1Loaded()
@@ -1968,9 +1976,11 @@ function playerAttack()
 			if ( collided )
 			{
 				enemies[i].life -= 1;
+				if(playerHit) playerHit.play();
 				if ( enemies[i].life <= 0)
 				{
 					score += 100;
+					if ( enemyDie ) enemyDie.play();
 					enemies[i].moveable.sprite.visible = false;
 					updateTarget( null );
 				}
@@ -1985,12 +1995,13 @@ function playerAttack()
 
 		if ( collided )
 		{
-
+			if ( playerHit ) playerHit.play();
 			boss.life -= 1;
 			if ( boss.life <= 0 && boss.moveable.sprite.currentAnimation != "Die" )
 			{
 				score += 9001
 				boss.moveable.sprite.gotoAndPlay( "Die" );
+				if ( bossDie ) bossDie.play();
 				updateTarget( null );
 			}
 			else
@@ -2059,6 +2070,7 @@ function enemyAttack(enemySprite)
 			//enemies[i].attacker.debugSprite.visible = true;
 			if ( invisibleTimeLeft <= 0 && enemies[i].attacker.collideSprite( player.moveable.sprite ) )
 			{
+				if ( enemyHit ) enemyHit.play();
 				player.life -= 0.25;
 			}
 		}
@@ -2108,6 +2120,7 @@ function bossUpdate()
 			boss.attacker.debugSprite.visible = true;
 			if ( invisibleTimeLeft <= 0 && boss.attacker.collideSprite( player.moveable.sprite ) )
 			{
+				if ( bossHit ) bossHit.play();
 				player.life -= 0.5;
 			}
 		}
@@ -2408,7 +2421,7 @@ function collideBullets()
 }
 
 var levelMusic, bossMusic;
-
+var playerDie, enemyDie, bossDie, playerHit, enemyHit, bossHit;
 //#region level1
 function level1Init()
 {
@@ -2538,6 +2551,14 @@ function level1Init()
 	levelMusic.setMute( mute );
 	bossMusic = mainBossMusic;
 	bossMusic.setMute( mute );
+
+	playerHit = mainPlayerHit;
+	playerDie = mainPlayerDie;
+	enemyHit = mainEnemyHit;
+	enemyDie = mainEnemyDie;
+	bossHit = mainEnemyHit;
+	bossDie = mainEnemyDie;
+
 	enemyTarget = null;
 	gameEngine.stage.addChild( audio );
 }
@@ -2548,6 +2569,13 @@ function level1Delete()
 	backDrops = spriteArray = enemies = stageBounds = null;
 	levelMusic.stop();
 	bossMusic.stop();
+
+	playerHit.stop();
+	playerDie.stop();
+	enemyHit.stop();
+	enemyDie.stop();
+	bossHit.stop();
+	bossDie.stop();
 }
 
 function level1Update()
@@ -2564,6 +2592,8 @@ function level1Update()
 	scoreDisplay.x = gameEngine.CANVASWIDTH - scoreDisplay.getMeasuredWidth();
 	if ( player.life <= 0 )
 	{
+		playerDie.play();
+		player.moveable.sprite.visible = false;
 		gameEngine.mode = "gameover";
 	}
 	if ( !boss.moveable.sprite.visible )
@@ -2700,6 +2730,13 @@ function level2Init()
 	levelMusic.setMute( mute );
 	bossMusic = mainBossMusic;
 	bossMusic.setMute( mute );
+
+	playerHit = mainPlayerHit;
+	playerDie = mainPlayerDie;
+	enemyHit = mainEnemyHit;
+	enemyDie = mainEnemyDie;
+	bossHit = mainEnemyHit;
+	bossDie = mainEnemyDie;
 	enemyTarget = null;
 	gameEngine.stage.addChild( audio );
 }
@@ -2710,6 +2747,13 @@ function level2Delete()
 	backDrops = spriteArray = enemies = stageBounds = null;
 	levelMusic.stop();
 	bossMusic.stop();
+
+	playerHit.stop();
+	playerDie.stop();
+	enemyHit.stop();
+	enemyDie.stop();
+	bossHit.stop();
+	bossDie.stop();
 }
 
 function level2Update()
@@ -2726,7 +2770,10 @@ function level2Update()
 	scoreDisplay.x = gameEngine.CANVASWIDTH - scoreDisplay.getMeasuredWidth();
 	if ( player.life <= 0 )
 	{
+		playerDie.play();
+		player.moveable.sprite.visible = false;
 		gameEngine.mode = "gameover";
+		
 	}
 	if ( !boss.moveable.sprite.visible )
 	{
@@ -2862,6 +2909,14 @@ function level3Init()
 	levelMusic.setMute( mute );
 	bossMusic = mainBossMusic;
 	bossMusic.setMute( mute );
+
+	playerHit = mainPlayerHit;
+	playerDie = mainPlayerDie;
+	enemyHit = mainEnemyHit;
+	enemyDie = mainEnemyDie;
+	bossHit = mainEnemyHit;
+	bossDie = mainEnemyDie;
+
 	enemyTarget = null;
 	gameEngine.stage.addChild( audio );
 }
@@ -2872,6 +2927,13 @@ function level3Delete()
 	backDrops = spriteArray = enemies = stageBounds = null;
 	levelMusic.stop();
 	bossMusic.stop();
+
+	playerHit.stop();
+	playerDie.stop();
+	enemyHit.stop();
+	enemyDie.stop();
+	bossHit.stop();
+	bossDie.stop();
 }
 
 function level3Update()
@@ -2888,6 +2950,8 @@ function level3Update()
 	scoreDisplay.x = gameEngine.CANVASWIDTH - scoreDisplay.getMeasuredWidth();
 	if ( player.life <= 0 )
 	{
+		playerDie.play();
+		player.moveable.sprite.visible = false;
 		gameEngine.mode = "gameover";
 	}
 	if ( !boss.moveable.sprite.visible )
@@ -3029,6 +3093,14 @@ function level4Init()
 	levelMusic.setMute( mute );
 	bossMusic = mainBossMusic;
 	bossMusic.setMute( mute );
+
+	playerHit = mainPlayerHit;
+	playerDie = mainPlayerDie;
+	enemyHit = mainEnemyHit;
+	enemyDie = mainEnemyDie;
+	bossHit = mainEnemyHit;
+	bossDie = mainEnemyDie;
+
 	enemyTarget = null;
 	gameEngine.stage.addChild( audio );
 }
@@ -3039,6 +3111,13 @@ function level4Delete()
 	backDrops = spriteArray = enemies = stageBounds = null;
 	levelMusic.stop();
 	bossMusic.stop();
+
+	playerHit.stop();
+	playerDie.stop();
+	enemyHit.stop();
+	enemyDie.stop();
+	bossHit.stop();
+	bossDie.stop();
 }
 
 function level4Update()
@@ -3055,6 +3134,8 @@ function level4Update()
 	scoreDisplay.x = gameEngine.CANVASWIDTH - scoreDisplay.getMeasuredWidth();
 	if ( player.life <= 0 )
 	{
+		playerDie.play();
+		player.moveable.sprite.visible = false;
 		gameEngine.mode = "gameover";
 	}
 	if ( !boss.moveable.sprite.visible )
@@ -3213,6 +3294,14 @@ function level5Init()
 	levelMusic.setMute( mute );
 	bossMusic = level5BossIntroMusic;
 	bossMusic.setMute( mute );
+
+	playerHit = mainPlayerHit;
+	playerDie = mainPlayerDie;
+	enemyHit = mainEnemyHit;
+	enemyDie = mainEnemyDie;
+	bossHit = mainEnemyHit;
+	bossDie = mainEnemyDie;
+
 	enemyTarget = null;
 	gameEngine.stage.addChild( audio );
 }
@@ -3223,6 +3312,13 @@ function level5Delete()
 	backDrops = spriteArray = enemies = stageBounds = null;
 	levelMusic.stop();
 	bossMusic.stop();
+
+	playerHit.stop();
+	playerDie.stop();
+	enemyHit.stop();
+	enemyDie.stop();
+	bossHit.stop();
+	bossDie.stop();
 }
 
 function level5Update()
@@ -3239,6 +3335,8 @@ function level5Update()
 	scoreDisplay.x = gameEngine.CANVASWIDTH - scoreDisplay.getMeasuredWidth();
 	if ( player.life <= 0 )
 	{
+		playerDie.play();
+		player.moveable.sprite.visible = false;
 		gameEngine.mode = "gameover";
 	}
 	if ( !boss.moveable.sprite.visible )
