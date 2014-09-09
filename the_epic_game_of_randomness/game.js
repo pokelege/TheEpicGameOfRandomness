@@ -70,10 +70,13 @@ var gameEngine =
 	//call this to delete all stages based on your deleter
 	removeAll: function ()
 	{
-		for ( i = 0; i < gameEngine.updateModeLooperArray.length; i++ )
+		for (var i = 0; i < gameEngine.updateModeLooperArray.length; i++ )
 		{
-			gameEngine.updateModeLooperArray[i].data.deleter();
-			gameEngine.updateModeLooperArray[i].data.initialized = false;
+			if ( gameEngine.updateModeLooperArray[i].data.initialized )
+			{
+				gameEngine.updateModeLooperArray[i].data.deleter();
+				gameEngine.updateModeLooperArray[i].data.initialized = false;
+			}
 		}
 		if ( gameEngine.loadingInitialized )
 		{
@@ -507,7 +510,7 @@ function instructionsInit()
 function instructionsDelete()
 {
 	gameEngine.stage.removeAllChildren();
-	gameEngine.stage.removeAllChildren();
+	gameEngine.stage.removeAllEventListeners();
 }
 function instructionsUpdate()
 {
@@ -654,7 +657,7 @@ function ( evt )
 	if ( evt.stageX < gameEngine.CANVASWIDTH / 2 )
 		characterMode = "jamie";
 	else characterMode = "halladay";
-	gameEngine.mode = "level5";
+	gameEngine.mode = "level1";
 	if ( titleMusic.playState == createjs.Sound.PLAY_SUCCEEDED )
 		titleMusic.stop();
 	score = null;
@@ -701,8 +704,9 @@ var Level1Manifest =
 		{ src: "images/level1/level1Bench.png", id: "level1Bench" },
 		{ src: "images/level1/level1Lamp.png", id: "level1Lamp" },
 		{ src: "images/level1/level1Trash.png", id: "level1Trash" },
+		{ src: "audio/level1/level1Music.mp3", id: "level1Music" }
 	];
-var Level1Queue, level1Frame, level1Enemy, level1EnemyIcon, level1Boss, level1BossIcon, level1BackGround, level1Bench, level1Lamp, level1Trash;
+var Level1Queue, level1Frame, level1Enemy, level1EnemyIcon, level1Boss, level1BossIcon, level1BackGround, level1Bench, level1Lamp, level1Trash, level1Music;
 
 var Level2Manifest =
 	[
@@ -714,8 +718,9 @@ var Level2Manifest =
 		{ src: "images/level2/level2Building.png", id: "level2Building" },
 		{ src: "images/level2/level2BackGround.png", id: "level2BackGround" },
 		{ src: "images/level2/level2Train.png", id: "level2Train" },
+		{ src: "audio/level2/level2Music.mp3", id: "level2Music" }
 	];
-var Level2Queue, level2Enemy, level2EnemyIcon, level2Boss, level2BossIcon, level2Building, level2BackGround, level2Train, level2Frame;
+var Level2Queue, level2Enemy, level2EnemyIcon, level2Boss, level2BossIcon, level2Building, level2BackGround, level2Train, level2Frame, level2Music;
 
 var Level3Manifest =
 	[
@@ -726,8 +731,9 @@ var Level3Manifest =
 		{ src: "images/level3/level3BossIcon.png", id: "level3BossIcon" },
 		{ src: "images/level3/level3BackGround.png", id: "level3BackGround" },
 		{ src: "images/level3/level3Shelf.png", id: "level3Shelf" },
+		{ src: "audio/level3/level3Music.mp3", id: "level3Music" }
 	];
-var Level3Queue, level3Frame, level3Enemy, level3EnemyIcon, level3Boss, level3BossIcon, level3BackGround, level3Shelf;
+var Level3Queue, level3Frame, level3Enemy, level3EnemyIcon, level3Boss, level3BossIcon, level3BackGround, level3Shelf, level3Music;
 
 var Level4Manifest =
 	[
@@ -741,8 +747,9 @@ var Level4Manifest =
 		{ src: "images/level4/level4DoorRight.png", id: "level4DoorRight" },
 		{ src: "images/level4/level4Lights.png", id: "level4Lights" },
 		{ src: "images/level4/level4Table.png", id: "level4Table" },
+		{ src: "audio/level4/level4Music.mp3", id: "level4Music" }
 	];
-var Level4Queue, level4Frame, level4Enemy, level4EnemyIcon, level4Boss, level4BossIcon, level4BackGround, level4Chair, level4DoorRight, level4Lights, level4Table;
+var Level4Queue, level4Frame, level4Enemy, level4EnemyIcon, level4Boss, level4BossIcon, level4BackGround, level4Chair, level4DoorRight, level4Lights, level4Table, level4Music;
 
 var Level5Manifest =
 	[
@@ -754,8 +761,9 @@ var Level5Manifest =
 		{ src: "images/level5/level5BackGround.png", id: "level5BackGround" },
 		{ src: "images/level5/level5WoodPile.png", id: "level5WoodPile" },
 		{ src: "images/level5/level5Building.png", id: "level5Building" },
+		{ src: "audio/level5/level5Music.mp3", id: "level5Music" }
 	];
-var Level5Queue, level5Frame, level5Enemy, level5EnemyIcon, level5Boss, level5BossIcon, level5BackGround, level5WoodPile, level5Building;
+var Level5Queue, level5Frame, level5Enemy, level5EnemyIcon, level5Boss, level5BossIcon, level5BackGround, level5WoodPile, level5Building, level5Music;
 
 
 function mainGameLoaded()
@@ -965,6 +973,7 @@ function level1Loaded()
 	level1Trash.regY = level1Trash.getBounds().height;
 	level1Trash.scaleX = 0.50;
 	level1Trash.scaleY = 0.50;
+	level1Music = new createjs.Sound.createInstance( "level1Music" );
 }
 
 function level2Loaded()
@@ -1060,6 +1069,7 @@ function level2Loaded()
 	level2Building = new createjs.Bitmap( Level2Queue[0].getResult( "level2Building" ) );
 	level2BackGround = new createjs.Bitmap( Level2Queue[0].getResult( "level2BackGround" ) );
 	level2Train = new createjs.Bitmap( Level2Queue[0].getResult( "level2Train" ) );
+	level2Music = new createjs.Sound.createInstance( "level2Music" );
 }
 
 function level3Loaded()
@@ -1155,6 +1165,7 @@ function level3Loaded()
 	level3BackGround = new createjs.Bitmap( Level3Queue[0].getResult( "level3BackGround" ) );
 	level3Shelf = new createjs.Bitmap( Level3Queue[0].getResult( "level3Shelf" ) );
 	level3Shelf.regY = level3Shelf.getBounds().height;
+	level3Music = new createjs.Sound.createInstance( "level3Music" );
 }
 
 function level4Loaded()
@@ -1262,6 +1273,7 @@ function level4Loaded()
 
 	level4Table = new createjs.Bitmap( Level4Queue[0].getResult( "level4Table" ) );
 	level4Table.regY = level4Table.getBounds().height;
+	level4Music = new createjs.Sound.createInstance( "level4Music" );
 }
 
 function level5Loaded()
@@ -1361,6 +1373,7 @@ function level5Loaded()
 
 	level5Building = new createjs.Bitmap( Level5Queue[0].getResult( "level5Building" ) );
 	level5Building.regY = level5Building.getBounds().height;
+	level5Music = new createjs.Sound.createInstance( "level5Music" );
 }
 
 function vec2( x, y )
@@ -2408,7 +2421,8 @@ function level1Init()
 	gameEngine.stage.addChild( scoreText );
 	gameEngine.stage.addChild( scoreDisplay );
 
-	if ( gameMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) gameMusic.play( { loop: -1 } );
+	level1Music.play( { loop: -1 } );
+	level1Music.setMute( mute );
 	enemyTarget = null;
 }
 
@@ -2416,6 +2430,7 @@ function level1Delete()
 {
 	gameEngine.stage.removeAllChildren();
 	backDrops = spriteArray = enemies = stageBounds = null;
+	level1Music.stop();
 }
 
 function level1Update()
@@ -2433,13 +2448,12 @@ function level1Update()
 	if ( player.life <= 0 )
 	{
 		gameEngine.mode = "gameover";
-		if ( gameMusic.playState == createjs.Sound.PLAY_SUCCEEDED ) gameMusic.stop();
 	}
 	if ( !boss.moveable.sprite.visible )
 	{
 		gameEngine.mode = "level2";
 	}
-	gameMusic.setMute( mute );
+	level1Music.setMute( mute );
 }
 //#endregion
 
@@ -2563,7 +2577,8 @@ function level2Init()
 	gameEngine.stage.addChild( scoreText );
 	gameEngine.stage.addChild( scoreDisplay );
 
-	if ( gameMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) gameMusic.play( { loop: -1 } );
+	level2Music.play( { loop: -1 } );
+	level2Music.setMute( mute );
 	enemyTarget = null;
 }
 
@@ -2571,6 +2586,7 @@ function level2Delete()
 {
 	gameEngine.stage.removeAllChildren();
 	backDrops = spriteArray = enemies = stageBounds = null;
+	level2Music.stop();
 }
 
 function level2Update()
@@ -2588,13 +2604,12 @@ function level2Update()
 	if ( player.life <= 0 )
 	{
 		gameEngine.mode = "gameover";
-		if ( gameMusic.playState == createjs.Sound.PLAY_SUCCEEDED ) gameMusic.stop();
 	}
 	if ( !boss.moveable.sprite.visible )
 	{
 		gameEngine.mode = "level3";
 	}
-	gameMusic.setMute( mute );
+	level2Music.setMute( mute );
 }
 //#endregion
 
@@ -2718,13 +2733,16 @@ function level3Init()
 	gameEngine.stage.addChild( scoreText );
 	gameEngine.stage.addChild( scoreDisplay );
 
-	if ( gameMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) gameMusic.play( { loop: -1 } );
+	level3Music.play( { loop: -1 } );
+	level3Music.setMute( mute );
+	enemyTarget = null;
 }
 
 function level3Delete()
 {
 	gameEngine.stage.removeAllChildren();
 	backDrops = spriteArray = enemies = stageBounds = null;
+	level3Music.stop();
 }
 
 function level3Update()
@@ -2742,12 +2760,12 @@ function level3Update()
 	if ( player.life <= 0 )
 	{
 		gameEngine.mode = "gameover";
-		if ( gameMusic.playState == createjs.Sound.PLAY_SUCCEEDED ) gameMusic.stop();
 	}
 	if ( !boss.moveable.sprite.visible )
 	{
 		gameEngine.mode = "level4";
 	}
+	level3Music.setMute( mute );
 }
 //#endregion
 
@@ -2801,8 +2819,8 @@ function level4Init()
 	{
 		enemies.push( new moveableAttacker( new moveableObject( level4Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level4Enemy.getTransformedBounds().width / 5, -level4Enemy.getTransformedBounds().height * 0.8, 40, level4Enemy.getTransformedBounds().height / 2 ), 3 ) );
 		enemies[i].attacker.characterSprite = enemies[i].moveable.sprite;
-		enemies[i].attacker.debugSprite = pixel.clone();
-		enemies[i].attacker.debugSprite.visible = true;
+		//enemies[i].attacker.debugSprite = pixel.clone();
+		//enemies[i].attacker.debugSprite.visible = true;
 		enemies[i].moveable.sprite.on( "animationend",
 		function ( evt ) { if ( evt.name == "Attack1" ) enemyAttack( evt.target ); }
 		);
@@ -2814,7 +2832,7 @@ function level4Init()
 
 		spriteArray.push( enemies[i].moveable );
 		spriteContainer.addChild( enemies[i].moveable.sprite );
-		spriteContainer.addChild( enemies[i].attacker.debugSprite );
+		//spriteContainer.addChild( enemies[i].attacker.debugSprite );
 	}
 
 	
@@ -2876,14 +2894,16 @@ function level4Init()
 	gameEngine.stage.addChild( scoreText );
 	gameEngine.stage.addChild( scoreDisplay );
 
-	if ( gameMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) gameMusic.play( {
-		loop: -1 } );
+	level4Music.play( { loop: -1 } );
+	level4Music.setMute( mute );
+	enemyTarget = null;
 }
 
 function level4Delete()
 {
 	gameEngine.stage.removeAllChildren();
 	backDrops = spriteArray = enemies = stageBounds = null;
+	level4Music.stop();
 }
 
 function level4Update()
@@ -2901,12 +2921,12 @@ function level4Update()
 	if ( player.life <= 0 )
 	{
 		gameEngine.mode = "gameover";
-		if ( gameMusic.playState == createjs.Sound.PLAY_SUCCEEDED ) gameMusic.stop();
 	}
 	if ( !boss.moveable.sprite.visible )
 	{
 		gameEngine.mode = "level5";
 	}
+	level4Music.setMute( mute );
 }
 //#endregion
 
@@ -3052,15 +3072,16 @@ function level5Init()
 	gameEngine.stage.addChild( scoreText );
 	gameEngine.stage.addChild( scoreDisplay );
 
-	if ( gameMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) gameMusic.play( {
-		loop: -1
-	} );
+	level5Music.play( { loop: -1 } );
+	level5Music.setMute( mute );
+	enemyTarget = null;
 }
 
 function level5Delete()
 {
 	gameEngine.stage.removeAllChildren();
 	backDrops = spriteArray = enemies = stageBounds = null;
+	level5Music.stop();
 }
 
 function level5Update()
@@ -3078,11 +3099,9 @@ function level5Update()
 	if ( player.life <= 0 )
 	{
 		gameEngine.mode = "gameover";
-		if ( gameMusic.playState == createjs.Sound.PLAY_SUCCEEDED ) gameMusic.stop();
 	}
 	if ( !boss.moveable.sprite.visible )
 	{
-		if ( gameMusic.playState == createjs.Sound.PLAY_SUCCEEDED ) gameMusic.stop();
 		var gotAllEggs = true;
 		for ( var i = 0; i < easterEggs.length; i++ )
 		{
@@ -3097,6 +3116,7 @@ function level5Update()
 		}
 		else gameEngine.mode = "win";
 	}
+	level5Music.setMute( mute );
 }
 //#endregion
 
@@ -3125,6 +3145,7 @@ function andrewMain()
 
 	gameoverQueue = new Array();
 	gameoverQueue.push( new createjs.LoadQueue( true, "assets/" ) );
+	gameoverQueue[0].installPlugin( createjs.Sound );
 	gameoverQueue[0].on( "complete", gameoverLoaded, this );
 	gameoverQueue[0].loadManifest( gameoverManifest );
 	gameEngine.addModeLooper( "gameover", new gameEngine.updateModeLooper( gameoverInit, gameoverDelete, gameoverUpdate, gameoverQueue ) );
@@ -3154,6 +3175,7 @@ function andrewMain()
 
 	Level1Queue = new Array();
 	Level1Queue.push( new createjs.LoadQueue( true, "assets/" ) );
+	Level1Queue[0].installPlugin( createjs.Sound );
 	Level1Queue[0].on( "complete", level1Loaded );
 	Level1Queue[0].loadManifest( Level1Manifest );
 	Level1Queue.push( mainGameQueue );
@@ -3161,6 +3183,7 @@ function andrewMain()
 
 	Level2Queue = new Array();
 	Level2Queue.push( new createjs.LoadQueue( true, "assets/" ) );
+	Level2Queue[0].installPlugin( createjs.Sound );
 	Level2Queue[0].on( "complete", level2Loaded );
 	Level2Queue[0].loadManifest( Level2Manifest );
 	Level2Queue.push( mainGameQueue );
@@ -3168,6 +3191,7 @@ function andrewMain()
 
 	Level3Queue = new Array();
 	Level3Queue.push( new createjs.LoadQueue( true, "assets/" ) );
+	Level3Queue[0].installPlugin( createjs.Sound );
 	Level3Queue[0].on( "complete", level3Loaded );
 	Level3Queue[0].loadManifest( Level3Manifest );
 	Level3Queue.push( mainGameQueue );
@@ -3175,6 +3199,7 @@ function andrewMain()
 
 	Level4Queue = new Array();
 	Level4Queue.push( new createjs.LoadQueue( true, "assets/" ) );
+	Level4Queue[0].installPlugin( createjs.Sound );
 	Level4Queue[0].on( "complete", level4Loaded );
 	Level4Queue[0].loadManifest( Level4Manifest );
 	Level4Queue.push( mainGameQueue );
@@ -3182,6 +3207,7 @@ function andrewMain()
 
 	Level5Queue = new Array();
 	Level5Queue.push( new createjs.LoadQueue( true, "assets/" ) );
+	Level5Queue[0].installPlugin( createjs.Sound );
 	Level5Queue[0].on( "complete", level5Loaded );
 	Level5Queue[0].loadManifest( Level5Manifest );
 	Level5Queue.push( mainGameQueue );
