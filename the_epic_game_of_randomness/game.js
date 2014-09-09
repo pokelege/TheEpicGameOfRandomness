@@ -654,7 +654,7 @@ function ( evt )
 	if ( evt.stageX < gameEngine.CANVASWIDTH / 2 )
 		characterMode = "jamie";
 	else characterMode = "halladay";
-	gameEngine.mode = "level3";
+	gameEngine.mode = "level1";
 	if ( titleMusic.playState == createjs.Sound.PLAY_SUCCEEDED )
 		titleMusic.stop();
 	score = null;
@@ -1850,7 +1850,7 @@ function enemyAttack(enemySprite)
 			//enemies[i].attacker.debugSprite.visible = true;
 			if ( invisibleTimeLeft <= 0 && enemies[i].attacker.collideSprite( player.moveable.sprite ) )
 			{
-				player.life -= 1;
+				player.life -= 0.25;
 			}
 		}
 	}
@@ -1897,7 +1897,7 @@ function bossUpdate()
 			boss.attacker.debugSprite.visible = true;
 			if ( invisibleTimeLeft <= 0 && boss.attacker.collideSprite( player.moveable.sprite ) )
 			{
-				player.life -= 1;
+				player.life -= 0.5;
 			}
 		}
 		else
@@ -2073,7 +2073,12 @@ var INVISIBLETIME = 3;
 
 function invisibilityUpdate()
 {
-	if ( invisibleTimeLeft > 0 ) invisibleTimeLeft -= gameEngine.DT;
+	if ( invisibleTimeLeft > 0 )
+	{
+		invisibleTimeLeft -= gameEngine.DT;
+		if ( player.life < MAXLIFE ) player.life += gameEngine.DT;
+		if ( player.life > MAXLIFE ) player.life = MAXLIFE;
+	}
 	if ( invisibleTimeLeft < 0 ) invisibleTimeLeft = 0;
 	player.moveable.sprite.alpha = 1 - ( ( invisibleTimeLeft / INVISIBLETIME ) * 0.5 );
 }
@@ -2106,7 +2111,7 @@ function loadHalladay()
 	spriteArray.push( player.moveable );
 	spriteContainer.addChild( player.moveable.sprite );
 	spriteContainer.addChild( player.attacker.debugSprite );
-	playerIcon = halladayIcon
+	playerIcon = halladayIcon;
 }
 
 var score;
@@ -2227,7 +2232,7 @@ function level1Init()
 		enemies[i].icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height - 5;
 		spriteArray.push( enemies[i].moveable );
 		spriteContainer.addChild( enemies[i].moveable.sprite );
-		spriteContainer.addChild( enemies[i].attacker.debugSprite );
+		//spriteContainer.addChild( enemies[i].attacker.debugSprite );
 	}
 
 	camera = new vec2( 0, 0 );
@@ -2365,12 +2370,12 @@ function level2Init()
 	spriteContainer.addChild( boss.moveable.sprite );
 	spriteContainer.addChild( boss.attacker.debugSprite );
 	enemies = new Array();
-	for ( var i = 0; i < 1; i++ ) //30
+	for ( var i = 0; i < 30; i++ ) //30
 	{
 		enemies.push( new moveableAttacker( new moveableObject( level2Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level2Enemy.getTransformedBounds().width / 8, -level2Enemy.getTransformedBounds().height * 0.9, 50, level2Enemy.getTransformedBounds().height / 2 ), 3 ) );
 		enemies[i].attacker.characterSprite = enemies[i].moveable.sprite;
-		enemies[i].attacker.debugSprite = pixel.clone();
-		enemies[i].attacker.debugSprite.visible = true;
+		//enemies[i].attacker.debugSprite = pixel.clone();
+		//enemies[i].attacker.debugSprite.visible = true;
 		enemies[i].moveable.sprite.on( "animationend",
 		function ( evt ) { if ( evt.name == "Attack1" ) enemyAttack( evt.target ); }
 		);
@@ -2380,7 +2385,7 @@ function level2Init()
 		enemies[i].icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height - 5;
 		spriteArray.push( enemies[i].moveable );
 		spriteContainer.addChild( enemies[i].moveable.sprite );
-		spriteContainer.addChild( enemies[i].attacker.debugSprite );
+		//spriteContainer.addChild( enemies[i].attacker.debugSprite );
 	}
 
 	camera = new vec2( 0, 0 );
@@ -2522,10 +2527,10 @@ function level3Init()
 	enemies = new Array();
 	for ( var i = 0; i < 50; i++ )
 	{
-		enemies.push( new moveableAttacker( new moveableObject( level3Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level3Enemy.getTransformedBounds().width / 4, -level3Enemy.getTransformedBounds().height / 4, 100, 20 ), 3 ) );
+		enemies.push( new moveableAttacker( new moveableObject( level3Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level3Enemy.getTransformedBounds().width / 16, -level3Enemy.getTransformedBounds().height * 0.9, 50, level3Enemy.getTransformedBounds().height / 2 ), 3 ) );
 		enemies[i].attacker.characterSprite = enemies[i].moveable.sprite;
-		enemies[i].attacker.debugSprite = pixel.clone();
-		enemies[i].attacker.debugSprite.visible = true;
+		//enemies[i].attacker.debugSprite = pixel.clone();
+		//enemies[i].attacker.debugSprite.visible = true;
 		enemies[i].moveable.sprite.on( "animationend",
 		function ( evt ) { if ( evt.name == "Attack1" ) enemyAttack( evt.target ); }
 		);
@@ -2536,7 +2541,7 @@ function level3Init()
 
 		spriteArray.push( enemies[i].moveable );
 		spriteContainer.addChild( enemies[i].moveable.sprite );
-		spriteContainer.addChild( enemies[i].attacker.debugSprite );
+		//spriteContainer.addChild( enemies[i].attacker.debugSprite );
 	}
 
 	camera = new vec2( 0, 0 );
@@ -2545,9 +2550,9 @@ function level3Init()
 	else loadJamie();
 
 	powerStars = new Array();
-	for ( var i = 0; i < 4; i++ )
+	for ( var i = 0; i < 16; i++ )
 	{
-		powerStars.push( new moveableObject( powerStar.clone(), new vec2(( Math.random() * 7500 ) + gameEngine.CANVASWIDTH, 0 ) ) );
+		powerStars.push( new moveableObject( powerStar.clone(), new vec2(( Math.random() * MAXDISTANCE ) + gameEngine.CANVASWIDTH, 0 ) ) );
 		spriteArray.push( powerStars[i] );
 		stageBounds.contain( powerStars[i] );
 		spriteContainer.addChild( powerStars[i].sprite );
