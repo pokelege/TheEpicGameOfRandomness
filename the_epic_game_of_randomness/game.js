@@ -1403,15 +1403,15 @@ function level4Loaded()
 			{
 				regX: 0,
 				regY: 0,
-				width: 367,
-				height: 311
+				width: 424,
+				height: 552
 			},
 		animations:
 			{
 				Neutral: [0, 0],
 				Run:
 				{
-					frames: [0, 2],
+					frames: [0, 0],
 					next: "Neutral",
 					speed: 0.25
 				},
@@ -1425,10 +1425,10 @@ function level4Loaded()
 	}
 	);
 	level4Boss = new createjs.Sprite( level4BossSheet, "Neutral" );
-	level4Boss.scaleX = 1.5;
-	level4Boss.scaleY = 1.5;
-	level4Boss.regX = 367 / 2;
-	level4Boss.regY = 311 * 0.80;
+	level4Boss.regX = level4Boss.getBounds().width * 0.30;
+	level4Boss.regY = level4Boss.getBounds().height;
+	level4Boss.scaleX = 0.40;
+	level4Boss.scaleY = 0.40;
 
 	level4BossIcon = new createjs.Bitmap( Level4Queue[0].getResult( "level4BossIcon" ) );
 	if ( level4BossIcon.getTransformedBounds().width > level4BossIcon.getTransformedBounds().height )
@@ -1441,8 +1441,8 @@ function level4Loaded()
 		level4BossIcon.scaleX = 64 / level4BossIcon.getBounds().height;
 		level4BossIcon.scaleY = 64 / level4BossIcon.getBounds().height;
 	}
-	level4BossIcon.regX = level4BossIcon.getTransformedBounds().width;
-	level4BossIcon.regY = level4BossIcon.getTransformedBounds().height;
+	level4BossIcon.regX = level4BossIcon.getBounds().width;
+	level4BossIcon.regY = level4BossIcon.getBounds().height;
 
 	level4Frame = new createjs.Bitmap( Level4Queue[0].getResult( "level4Frame" ) );
 
@@ -3211,7 +3211,7 @@ function level4Init()
 
 	spriteContainerBackdrops = new Array();
 
-	boss = new moveableAttacker( new moveableObject( level4Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( 0, -level4Boss.getTransformedBounds().height / 8, level4Boss.getTransformedBounds().width, 10 ), 40 );
+	boss = new moveableAttacker( new moveableObject( level4Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( 0, -level4Boss.getTransformedBounds().height * 0.65, 110, 30 ), 40 );
 
 	stageBounds.contain( boss.moveable );
 
@@ -3220,11 +3220,11 @@ function level4Init()
 	boss.icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height - 5;
 
 	boss.attacker.characterSprite = boss.moveable.sprite;
-	boss.attacker.debugSprite = pixel.clone();
+	//boss.attacker.debugSprite = pixel.clone();
 	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Attack1" ) bossAttack(); } );
 	spriteArray.push( boss.moveable );
 	spriteContainer.addChild( boss.moveable.sprite );
-	spriteContainer.addChild( boss.attacker.debugSprite );
+	//spriteContainer.addChild( boss.attacker.debugSprite );
 	enemies = new Array();
 	for ( var i = 0; i < 75; i++ )
 	{
