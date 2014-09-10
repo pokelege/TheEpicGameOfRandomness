@@ -867,8 +867,8 @@ function mainGameLoaded()
 				{
 					regX: 0,
 					regY: 0,
-					width: 296,
-					height: 416,
+					width: 357,
+					height: 418,
 				},
 			animations:
 				{
@@ -882,6 +882,12 @@ function mainGameLoaded()
 					Attack1:
 					{
 						frames: [1],
+						next: "Neutral",
+						speed: 0.25
+					},
+					Attack2:
+					{
+						frames: [3],
 						next: "Neutral",
 						speed: 0.25
 					}
@@ -915,8 +921,8 @@ function mainGameLoaded()
 			{
 				regX: 0,
 				regY: 0,
-				width: 286,
-				height: 420,
+				width: 399,
+				height: 426,
 			},
 		animations:
 			{
@@ -932,18 +938,24 @@ function mainGameLoaded()
 					frames: [1],
 					next: "Neutral",
 					speed: 0.25
+				},
+				Attack2:
+				{
+					frames: [3],
+					next: "Neutral",
+					speed: 0.25
 				}
 			}
 	}
 );
 
 	halladayChara = new createjs.Sprite( halladayCharaSheet, "Neutral" );
-	halladayChara.regX = halladayChara.getBounds().width / 2;
+	halladayChara.regX = halladayChara.getBounds().width * 0.3;
 	halladayChara.regY = halladayChara.getBounds().height;
 	halladayChara.scaleX = 0.5;
 	halladayChara.scaleY = 0.5;
 
-	halladayIcon = new createjs.Bitmap( mainGameQueue.getResult( "jamieIcon" ) );
+	halladayIcon = new createjs.Bitmap( mainGameQueue.getResult( "halladayIcon" ) );
 	if ( halladayIcon.getTransformedBounds().width > halladayIcon.getTransformedBounds().height )
 	{
 		halladayIcon.scaleX = 64 / halladayIcon.getBounds().width;
@@ -1651,6 +1663,7 @@ function shortRangeAttack( x, y, width, height, characterSprite )
 	this.height = height;
 	this.characterSprite = characterSprite;
 	this.debugSprite = null;
+	this.damage = 1;
 	this.update = function ()
 	{
 		if ( this.debugSprite )
@@ -1688,6 +1701,7 @@ function longRangeAttack( x, y, character, projectileSprite, velocity, limit )
 	this.character = character;
 	this.projectileSprite = projectileSprite;
 	this.array = new Array();
+	this.damage = 1;
 	for ( var i = 0; i < limit; i++ )
 	{
 		this.array.push( new moveableObject( projectileSprite.clone(), new vec2( 0, 0 ), new vec2(velocity.x, velocity.y) ) );
@@ -1764,6 +1778,7 @@ function moveableAttacker( moveable, attacker, life )
 {
 	this.moveable = moveable;
 	this.attacker = attacker;
+	this.attacker2 = null;
 	this.life = life;
 	this.icon = null;
 }
@@ -1998,16 +2013,21 @@ function playerMovement()
 		}
 	}
 
-	if ( !primaryBuffer && ( gameEngine.ZPressed || gameEngine.IPressed || gameEngine.XPressed || gameEngine.OPressed ) && player.moveable.sprite.currentAnimation != "Attack1" ) //&& player.moveable.airDistance === 0 )
+	if ( !primaryBuffer && ( gameEngine.ZPressed || gameEngine.IPressed  ) && player.moveable.sprite.currentAnimation != "Attack1" && player.moveable.sprite.currentAnimation != "Attack2" ) //&& player.moveable.airDistance === 0 )
 	{
 		player.moveable.sprite.gotoAndPlay( "Attack1" );
+		primaryBuffer = true;
+	}
+	else if ( !primaryBuffer && ( gameEngine.XPressed || gameEngine.OPressed ) && player.moveable.sprite.currentAnimation != "Attack1" && player.moveable.sprite.currentAnimation != "Attack2" ) //&& player.moveable.airDistance === 0 )
+	{
+		player.moveable.sprite.gotoAndPlay( "Attack2" );
 		primaryBuffer = true;
 	}
 	else if ( !( gameEngine.ZPressed || gameEngine.IPressed || gameEngine.XPressed || gameEngine.OPressed ) ) primaryBuffer = false;
 
 	if ( posToAdd.equals( new vec2( 0, 0 ) ) )
 	{
-		if ( player.moveable.sprite.currentAnimation != "Neutral" && player.moveable.sprite.currentAnimation != "Attack1" )
+		if ( player.moveable.sprite.currentAnimation != "Neutral" && player.moveable.sprite.currentAnimation != "Attack1" && player.moveable.sprite.currentAnimation != "Attack2" )
 		{
 			player.moveable.sprite.gotoAndPlay( "Neutral" );
 		}
@@ -2025,6 +2045,11 @@ function playerMovement()
 				player.attacker.x *= -1;
 				player.attacker.width *= -1;
 			}
+			if ( player.attacker2.x < 0 || player.attacker2.width < 0 )
+				{
+				player.attacker2.x *= -1;
+				player.attacker2.width *= - 1;
+			}
 		}
 		else if ( posToAdd.x < 0 )
 		{
@@ -2037,8 +2062,13 @@ function playerMovement()
 				player.attacker.x *= -1;
 				player.attacker.width *= -1;
 			}
+			if ( player.attacker2.x > 0 || player.attacker2.width > 0 )
+		{
+				player.attacker2.x *= -1;
+				player.attacker2.width *= -1;
 		}
-		if ( player.moveable.sprite.currentAnimation == "Neutral" && player.moveable.sprite.currentAnimation != "Attack1" )
+		}
+		if ( player.moveable.sprite.currentAnimation == "Neutral" && player.moveable.sprite.currentAnimation != "Attack1" && player.moveable.sprite.currentAnimation != "Attack2" )
 		{
 			player.moveable.sprite.gotoAndPlay( "Run" );
 		}
@@ -2080,6 +2110,7 @@ function playerMovement()
 	}
 
 	player.attacker.update();
+	player.attacker2.update();
 }
 
 var tomBuffer = false;
@@ -2109,7 +2140,7 @@ function playerAttack()
 
 			if ( collided )
 			{
-				enemies[i].life -= 1;
+				enemies[i].life -= player.attacker.damage;
 				if ( playerHit ) playerHit.play();
 				if ( enemies[i].life <= 0 )
 				{
@@ -2131,7 +2162,58 @@ function playerAttack()
 		if ( collided )
 		{
 			if ( playerHit ) playerHit.play();
-			boss.life -= 1;
+			boss.life -= player.attacker.damage;
+			if ( boss.life <= 0 )
+			{
+				score += 9001
+				addExplosion( new vec2( boss.moveable.position.x, boss.moveable.position.y - ( boss.moveable.sprite.getTransformedBounds().height * 0.5 ) ) );
+				boss.moveable.sprite.visible = false;
+				if ( bossDie ) bossDie.play();
+				updateTarget( null );
+			}
+			else
+			{
+				updateTarget( boss );
+			}
+		}
+	}
+}
+
+function playerAttack2()
+{
+	player.attacker2.update();
+	//player.attacker.debugSprite.visible = true;
+	for ( var i = 0; i < enemies.length; i++ )
+	{
+		if ( enemies[i].moveable.sprite.visible )
+		{
+			var collided = player.attacker2.collideSprite( enemies[i].moveable.sprite );
+
+			if ( collided )
+			{
+				enemies[i].life -= player.attacker2.damage;
+				if ( playerHit ) playerHit.play();
+				if ( enemies[i].life <= 0 )
+				{
+					score += 100;
+					addExplosion( new vec2( enemies[i].moveable.position.x, enemies[i].moveable.position.y - ( enemies[i].moveable.sprite.getTransformedBounds().height * 0.5 ) ) );
+					if ( enemyDie ) enemyDie.play();
+					enemies[i].moveable.sprite.visible = false;
+					updateTarget( null );
+				}
+				else updateTarget( enemies[i] );
+			}
+		}
+	}
+
+	if ( boss.moveable.sprite.visible )
+	{
+		var collided = player.attacker2.collideSprite( boss.moveable.sprite );
+
+		if ( collided )
+		{
+			if ( playerHit ) playerHit.play();
+			boss.life -= player.attacker2.damage;
 			if ( boss.life <= 0 )
 			{
 				score += 9001
@@ -2160,7 +2242,7 @@ function enemyMovement()
 			if ( distance < gameEngine.CANVASWIDTH * 1.25 && !enemies[i].attacker.collideSprite( player.moveable.sprite ) && enemies[i].moveable.sprite.currentAnimation != "Attack1" )
 			{
 				if ( enemies[i].moveable.sprite.currentAnimation != "Run" ) enemies[i].moveable.sprite.gotoAndPlay( "Run" );
-				if ( Math.abs( enemies[i].moveable.position.x - player.moveable.position.x ) < ( player.moveable.sprite.getTransformedBounds().width * 0.75 ) ) moveAwayPlayer( enemies[i].moveable, false, true );
+				if ( Math.abs( enemies[i].moveable.position.x - player.moveable.position.x ) < ( player.moveable.sprite.getTransformedBounds().width * 0.25 ) ) moveAwayPlayer( enemies[i].moveable, false, true );
 				else moveToPlayer( enemies[i].moveable );
 
 				if ( enemies[i].moveable.facing == "right" )
@@ -2206,7 +2288,7 @@ function enemyAttack( enemySprite )
 			if ( invisibleTimeLeft <= 0 && enemies[i].attacker.collideSprite( player.moveable.sprite ) )
 			{
 				if ( enemyHit ) enemyHit.play();
-				player.life -= 0.25;
+				player.life -= enemies[i].attacker.damage;
 			}
 		}
 	}
@@ -2222,7 +2304,7 @@ function bossUpdate()
 		{
 			if ( bossMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) bossMusic.play();
 			if ( levelMusic.playState == createjs.Sound.PLAY_SUCCEEDED ) levelMusic.stop( { loop: -1 } );
-			if ( Math.abs( boss.moveable.position.x - player.moveable.position.x ) < ( player.moveable.sprite.getTransformedBounds().width * 0.75 ) ) moveAwayPlayer( boss.moveable, false, true );
+			if ( Math.abs( boss.moveable.position.x - player.moveable.position.x ) < ( player.moveable.sprite.getTransformedBounds().width * 0.25 ) ) moveAwayPlayer( boss.moveable, false, true );
 			else moveToPlayer( boss.moveable );
 			if ( boss.moveable.sprite.currentAnimation != "Run" ) boss.moveable.sprite.gotoAndPlay( "Run" );
 			if ( boss.moveable.facing == "right" )
@@ -2309,7 +2391,7 @@ function bossAttack()
 	if ( invisibleTimeLeft <= 0 && boss.attacker.collideSprite( player.moveable.sprite ) )
 	{
 		if ( bossHit ) bossHit.play();
-		player.life -= 0.5;
+		player.life -= boss.attacker.damage;
 	}
 }
 
@@ -2517,31 +2599,41 @@ function invisibilityUpdate()
 function loadJamie()
 {
 	player = new moveableAttacker( new moveableObject( jamieChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack( jamieChara.getTransformedBounds().width * 0.25, -jamieChara.getTransformedBounds().height * 0.75, 40, 80 ), 100 );
+	player.attacker2 = new shortRangeAttack( jamieChara.getTransformedBounds().width * 0.25, -jamieChara.getTransformedBounds().height * 0.75, 40, 80 );
 	player.moveable.sprite.on( "animationend", function ( evt )
 	{
 		if ( evt.name == "Attack1" ) playerAttack();
+		if ( evt.name == "Attack2" ) playerAttack2();
 	} );
 	player.attacker.characterSprite = player.moveable.sprite;
-	//player.attacker.debugSprite = pixel.clone();
+	player.attacker2.characterSprite = player.moveable.sprite;
+	player.attacker.debugSprite = pixel.clone();
+	player.attacker2.debugSprite = pixel.clone();
 	spriteArray.push( player.moveable );
 	spriteContainer.addChild( player.moveable.sprite );
-	//spriteContainer.addChild( player.attacker.debugSprite );
+	spriteContainer.addChild( player.attacker.debugSprite );
+	spriteContainer.addChild( player.attacker2.debugSprite );
 	playerIcon = jamieIcon;
 }
 
 function loadHalladay()
 {
 	//player = new moveableAttacker( new moveableObject( halladayChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new longRangeAttack( halladayChara.getTransformedBounds().width, -halladayChara.getTransformedBounds().height / 2, null, powerStar.clone(), new vec2( 10, 0 ), 3 ), 100 );
-	player = new moveableAttacker( new moveableObject( halladayChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack( halladayChara.getTransformedBounds().width * 0.25, -halladayChara.getTransformedBounds().height * 0.75, 40, 80 ), 100 );
+	player = new moveableAttacker( new moveableObject( halladayChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack( halladayChara.getTransformedBounds().width * 0.2, -halladayChara.getTransformedBounds().height * 0.75, 40, 80 ), 100 );
+	player.attacker2 = new shortRangeAttack( halladayChara.getTransformedBounds().width * 0.275, -halladayChara.getTransformedBounds().height * 0.775, 80, 80 );
 	player.moveable.sprite.on( "animationend", function ( evt )
 	{
 		if ( evt.name == "Attack1" ) playerAttack();
+		if ( evt.name == "Attack2" ) playerAttack2();
 	} );
 	player.attacker.characterSprite = player.moveable.sprite;
+	player.attacker2.characterSprite = player.moveable.sprite;
 	//player.attacker.debugSprite = pixel.clone();
+	//player.attacker2.debugSprite = pixel.clone();
 	spriteArray.push( player.moveable );
 	spriteContainer.addChild( player.moveable.sprite );
 	//spriteContainer.addChild( player.attacker.debugSprite );
+	//spriteContainer.addChild( player.attacker2.debugSprite );
 	playerIcon = halladayIcon;
 }
 
@@ -2566,7 +2658,7 @@ function TRAXBossSpecialCollide()
 		{
 			collided.sprite.visible = false;
 			if ( bossHit ) bossHit.play();
-			player.life -= 0.5;
+			player.life -= 1;
 		}
 	}
 }
@@ -2846,7 +2938,7 @@ function level2Init()
 
 	spriteContainerBackdrops = new Array();
 
-	boss = new moveableAttacker( new moveableObject( level2Boss.clone(), new vec2( 0, 0 ), 5 ), new longRangeAttack( level2Boss.getTransformedBounds().width * 0.5, -level2Boss.getTransformedBounds().height * 0.5, null, bullet, new vec2( 15, 0 ), 10 ), 20 );
+	boss = new moveableAttacker( new moveableObject( level2Boss.clone(), new vec2( MAXDISTANCE, 0 ), 5 ), new longRangeAttack( level2Boss.getTransformedBounds().width * 0.5, -level2Boss.getTransformedBounds().height * 0.5, null, bullet, new vec2( 15, 0 ), 10 ), 20 );
 	boss.icon = level2BossIcon.clone();
 	boss.icon.x = gameEngine.CANVASWIDTH;
 	boss.icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height - 5;
@@ -3053,6 +3145,7 @@ function level3Init()
 	boss.icon = level3BossIcon.clone();
 	boss.icon.x = gameEngine.CANVASWIDTH;
 	boss.icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height - 5;
+	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Attack1" ) bossAttack(); } );
 	stageBounds.contain( boss.moveable );
 	boss.attacker.characterSprite = boss.moveable.sprite;
 	spriteArray.push( boss.moveable );
