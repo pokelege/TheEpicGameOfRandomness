@@ -469,7 +469,7 @@ var titleManifest =
 	{ src: "images/instructionsButton.png", id: "instructionsButton" },
 	{ src: "images/creditsButton.png", id: "creditsButton" },
 	{ src: "images/audio.png", id: "audio" },
-	{ src: "audio/characterSelect.mp3", id: "titleMusic" }
+	{ src: "audio/title.mp3", id: "titleMusic" }
 ];
 var titleQueue;
 var titleScreen, playButton, instructionsButton, creditsButton, titleMusic, audio;
@@ -644,13 +644,15 @@ function gameoverUpdate()
 //#region win
 var winManifest =
 	[
-		{ src: "images/win.jpg", id: "win" }
+		{ src: "images/win.jpg", id: "win" },
+		{ src: "audio/win.mp3", id: "winMusic" }
 	];
 var winQueue;
-var win;
+var win, winMusic;
 function winLoaded()
 {
 	win = new createjs.Bitmap( winQueue[0].getResult( "win" ) );
+	winMusic = new createjs.Sound.createInstance( "winMusic" );
 }
 
 function winInit()
@@ -658,29 +660,34 @@ function winInit()
 	gameEngine.stage.addChild( win );
 	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "credits"; } );
 	gameEngine.stage.addChild( audio );
+	winMusic.play( { loop: -1 } );
+	winMusic.setMute( mute );
 }
 
 function winDelete()
 {
 	gameEngine.stage.removeAllChildren();
 	gameEngine.stage.removeAllEventListeners();
+	winMusic.stop();
 }
 function winUpdate()
 {
-
+	winMusic.setMute( mute );
 }
 //#endregion
 
 //#region trueWin
 var trueWinManifest =
 	[
-		{ src: "images/win.jpg", id: "trueWin" }
+		{ src: "images/trueWin.jpg", id: "trueWin" },
+		{ src: "audio/trueWin.mp3", id: "trueWinMusic" }
 	];
 var trueWinQueue;
-var trueWin;
+var trueWin, trueWinMusic;
 function trueWinLoaded()
 {
 	trueWin = new createjs.Bitmap( trueWinQueue[0].getResult( "trueWin" ) );
+	trueWinMusic = new createjs.Sound.createInstance( "trueWinMusic" );
 }
 
 function trueWinInit()
@@ -688,16 +695,19 @@ function trueWinInit()
 	gameEngine.stage.addChild( trueWin );
 	gameEngine.stage.on( "click", function ( evt ) { gameEngine.mode = "credits"; } );
 	gameEngine.stage.addChild( audio );
+	trueWinMusic.play( { loop: -1 } );
+	trueWinMusic.setMute( mute );
 }
 
 function trueWinDelete()
 {
 	gameEngine.stage.removeAllChildren();
 	gameEngine.stage.removeAllEventListeners();
+	trueWinMusic.stop();
 }
 function trueWinUpdate()
 {
-
+	trueWinMusic.setMute( mute );
 }
 //#endregion
 
@@ -705,7 +715,7 @@ function trueWinUpdate()
 var characterSelectManifest =
 	[
 		{ src: "images/characterSelect.png", id: "characterSelect" },
-		//{ src: "audio/characterSelect.mp3", id: "characterSelectMusic" }
+		{ src: "audio/characterSelect.mp3", id: "characterSelectMusic" }
 	];
 var characterSelectQueue;
 var characterSelect, characterSelectMusic;
@@ -713,7 +723,7 @@ var characterMode = "jamie";
 function characterSelectLoaded()
 {
 	characterSelect = new createjs.Bitmap( characterSelectQueue[0].getResult( "characterSelect" ) );
-	characterSelectMusic = new createjs.Sound.createInstance( "titleMusic" );
+	characterSelectMusic = new createjs.Sound.createInstance( "characterSelectMusic" );
 }
 
 function characterSelectInit()
@@ -725,7 +735,7 @@ function ( evt )
 	if ( evt.stageX < gameEngine.CANVASWIDTH / 2 )
 		characterMode = "jamie";
 	else characterMode = "halladay";
-	gameEngine.mode = "level3";
+	gameEngine.mode = "level4";
 	if ( titleMusic.playState == createjs.Sound.PLAY_SUCCEEDED )
 		titleMusic.stop();
 	score = null;
@@ -766,8 +776,10 @@ var mainGameManifest =
 		{ src: "audio/enemyHit.mp3", id: "mainEnemyHit" },
 		{ src: "audio/playerScream.mp3", id: "mainPlayerDie" },
 		{ src: "audio/enemyScream.mp3", id: "mainEnemyDie" },
+		{ src: "audio/egg.mp3", id: "eggGet" },
+		{ src: "audio/star.mp3", id: "starGet" },
 	];
-var mainGameQueue, jamieChara, jamieIcon, halladayChara, halladayIcon, pixel, healthBar, powerStar, easterEgg, mainBossMusic, mainPlayerHit, mainEnemyHit, mainPlayerDie, mainEnemyDie, circleExplosion;
+var mainGameQueue, jamieChara, jamieIcon, halladayChara, halladayIcon, pixel, healthBar, powerStar, easterEgg, mainBossMusic, mainPlayerHit, mainEnemyHit, mainPlayerDie, mainEnemyDie, circleExplosion, eggGet, starGet;
 
 var Level1Manifest =
 	[
@@ -993,6 +1005,8 @@ function mainGameLoaded()
 	mainEnemyHit = new createjs.Sound.createInstance( "mainEnemyHit" );
 	mainPlayerDie = new createjs.Sound.createInstance( "mainPlayerDie" );
 	mainEnemyDie = new createjs.Sound.createInstance( "mainEnemyDie" );
+	starGet = new createjs.Sound.createInstance( "starGet" );
+	eggGet = new createjs.Sound.createInstance( "eggGet" );
 }
 
 function level1Loaded()
@@ -2033,6 +2047,7 @@ function playerMovement()
 		{
 			if ( ndgmr.checkRectCollision( player.moveable.sprite, powerStars[i].sprite ) )
 			{
+				starGet.play();
 				powerStars[i].sprite.visible = false;
 				invisibleTimeLeft = INVISIBLETIME;
 			}
@@ -2045,6 +2060,7 @@ function playerMovement()
 		{
 			if ( ndgmr.checkRectCollision( player.moveable.sprite, easterEggs[i].sprite ) )
 			{
+				eggGet.play();
 				easterEggs[i].sprite.visible = false;
 			}
 		}
