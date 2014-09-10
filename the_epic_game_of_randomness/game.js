@@ -705,7 +705,7 @@ function trueWinUpdate()
 var characterSelectManifest =
 	[
 		{ src: "images/characterSelect.png", id: "characterSelect" },
-		{ src: "audio/characterSelect.mp3", id: "characterSelectMusic" }
+		//{ src: "audio/characterSelect.mp3", id: "characterSelectMusic" }
 	];
 var characterSelectQueue;
 var characterSelect, characterSelectMusic;
@@ -713,7 +713,7 @@ var characterMode = "jamie";
 function characterSelectLoaded()
 {
 	characterSelect = new createjs.Bitmap( characterSelectQueue[0].getResult( "characterSelect" ) );
-	characterSelectMusic = new createjs.Sound.createInstance( "characterSelectMusic" );
+	characterSelectMusic = new createjs.Sound.createInstance( "titleMusic" );
 }
 
 function characterSelectInit()
@@ -725,7 +725,7 @@ function ( evt )
 	if ( evt.stageX < gameEngine.CANVASWIDTH / 2 )
 		characterMode = "jamie";
 	else characterMode = "halladay";
-	gameEngine.mode = "level5";
+	gameEngine.mode = "level3";
 	if ( titleMusic.playState == createjs.Sound.PLAY_SUCCEEDED )
 		titleMusic.stop();
 	score = null;
@@ -753,9 +753,9 @@ function characterSelectUpdate()
 var mainGameManifest =
 	[
 		{ src: "images/jamieChara.png", id: "jamieChara" },
-		{ src: "images/powerStar.png", id: "jamieIcon" },
-		{ src: "images/jamieChara.png", id: "halladayChara" },
-		{ src: "images/powerStar.png", id: "halladayIcon" },
+		{ src: "images/jamieCharaIcon.png", id: "jamieIcon" },
+		{ src: "images/halladayChara.png", id: "halladayChara" },
+		{ src: "images/halladayCharaIcon.png", id: "halladayIcon" },
 		{ src: "images/fpsBar.png", id: "healthBar" },
 		{ src: "images/powerStar.png", id: "powerStar" },
 		{ src: "images/easterEgg.png", id: "easterEgg" },
@@ -851,21 +851,36 @@ function mainGameLoaded()
 		{
 			images: [mainGameQueue.getResult( "jamieChara" )],
 			frames:
-				[[5, 5, 54, 222, 0, 15.450000000000003, 130.55], [64, 5, 81, 221, 0, 35.45, 128.55], [150, 5, 99, 221, 0, 40.45, 129.55], [254, 5, 109, 202, 0, 47.45, 115.55000000000001], [368, 5, 133, 197, 0, 53.45, 109.55000000000001], [506, 5, 141, 192, 0, 56.45, 104.55000000000001], [652, 5, 129, 192, 0, 50.45, 109.55000000000001], [786, 5, 115, 201, 0, 45.45, 111.55000000000001], [906, 5, 103, 202, 0, 34.45, 111.55000000000001], [5, 232, 93, 202, 0, 22.450000000000003, 111.55000000000001], [103, 232, 90, 206, 0, 18.450000000000003, 114.55000000000001], [198, 232, 106, 204, 0, 35.45, 111.55000000000001], [309, 232, 109, 203, 0, 40.45, 111.55000000000001], [423, 232, 115, 198, 0, 47.45, 111.55000000000001], [543, 232, 132, 197, 0, 53.45, 109.55000000000001], [680, 232, 141, 192, 0, 56.45, 104.55000000000001], [826, 232, 129, 192, 0, 50.45, 109.55000000000001], [5, 443, 115, 201, 0, 45.45, 111.55000000000001], [125, 443, 103, 202, 0, 34.45, 111.55000000000001], [233, 443, 93, 202, 0, 22.450000000000003, 111.55000000000001], [331, 443, 90, 206, 0, 18.450000000000003, 114.55000000000001], [426, 443, 106, 204, 0, 35.45, 111.55000000000001], [537, 443, 109, 203, 0, 40.45, 111.55000000000001], [651, 443, 117, 198, 0, 47.45, 111.55000000000001], [773, 443, 132, 197, 0, 53.45, 109.55000000000001], [5, 5, 54, 222, 0, 15.450000000000003, 130.55], [64, 5, 81, 221, 0, 35.45, 128.55], [910, 443, 97, 217, 0, 38.45, 129.55], [5, 665, 119, 217, 0, 41.45, 129.55], [129, 665, 146, 212, 0, 52.45, 129.55]],
+				{
+					regX: 0,
+					regY: 0,
+					width: 296,
+					height: 416,
+				},
 			animations:
 				{
-					Neutral: [0, 0, "Neutral"],
-					Run: [1, 4, "RunLoop"],
-					RunLoop: [5, 24, "RunLoop"],
-					Attack1: [25, 29, "Neutral", 0.5]
+					Neutral: [0, 0],
+					Run:
+					{
+						frames: [0, 2],
+						next: "Neutral",
+						speed: 0.25
+					},
+					Attack1:
+					{
+						frames: [1],
+						next: "Neutral",
+						speed: 0.25
+					}
 				}
 		}
 	);
 
 	jamieChara = new createjs.Sprite( jamieCharaSheet, "Neutral" );
-	jamieChara.scaleX = 0.75;
-	jamieChara.scaleY = 0.75;
-	jamieChara.regY = jamieChara.getTransformedBounds().height / 2;
+	jamieChara.regX = jamieChara.getBounds().width / 2;
+	jamieChara.regY = jamieChara.getBounds().height;
+	jamieChara.scaleX = 0.5;
+	jamieChara.scaleY = 0.5;
 
 	jamieIcon = new createjs.Bitmap( mainGameQueue.getResult( "jamieIcon" ) );
 	if ( jamieIcon.getTransformedBounds().width > jamieIcon.getTransformedBounds().height )
@@ -884,21 +899,36 @@ function mainGameLoaded()
 	{
 		images: [mainGameQueue.getResult( "halladayChara" )],
 		frames:
-			[[5, 5, 54, 222, 0, 15.450000000000003, 130.55], [64, 5, 81, 221, 0, 35.45, 128.55], [150, 5, 99, 221, 0, 40.45, 129.55], [254, 5, 109, 202, 0, 47.45, 115.55000000000001], [368, 5, 133, 197, 0, 53.45, 109.55000000000001], [506, 5, 141, 192, 0, 56.45, 104.55000000000001], [652, 5, 129, 192, 0, 50.45, 109.55000000000001], [786, 5, 115, 201, 0, 45.45, 111.55000000000001], [906, 5, 103, 202, 0, 34.45, 111.55000000000001], [5, 232, 93, 202, 0, 22.450000000000003, 111.55000000000001], [103, 232, 90, 206, 0, 18.450000000000003, 114.55000000000001], [198, 232, 106, 204, 0, 35.45, 111.55000000000001], [309, 232, 109, 203, 0, 40.45, 111.55000000000001], [423, 232, 115, 198, 0, 47.45, 111.55000000000001], [543, 232, 132, 197, 0, 53.45, 109.55000000000001], [680, 232, 141, 192, 0, 56.45, 104.55000000000001], [826, 232, 129, 192, 0, 50.45, 109.55000000000001], [5, 443, 115, 201, 0, 45.45, 111.55000000000001], [125, 443, 103, 202, 0, 34.45, 111.55000000000001], [233, 443, 93, 202, 0, 22.450000000000003, 111.55000000000001], [331, 443, 90, 206, 0, 18.450000000000003, 114.55000000000001], [426, 443, 106, 204, 0, 35.45, 111.55000000000001], [537, 443, 109, 203, 0, 40.45, 111.55000000000001], [651, 443, 117, 198, 0, 47.45, 111.55000000000001], [773, 443, 132, 197, 0, 53.45, 109.55000000000001], [5, 5, 54, 222, 0, 15.450000000000003, 130.55], [64, 5, 81, 221, 0, 35.45, 128.55], [910, 443, 97, 217, 0, 38.45, 129.55], [5, 665, 119, 217, 0, 41.45, 129.55], [129, 665, 146, 212, 0, 52.45, 129.55]],
+			{
+				regX: 0,
+				regY: 0,
+				width: 286,
+				height: 420,
+			},
 		animations:
 			{
-				Neutral: [0, 0, "Neutral"],
-				Run: [1, 4, "RunLoop"],
-				RunLoop: [5, 24, "RunLoop"],
-				Attack1: [25, 28, "Neutral", 0.5]
+				Neutral: [0, 0],
+				Run:
+				{
+					frames: [0, 2],
+					next: "Neutral",
+					speed: 0.25
+				},
+				Attack1:
+				{
+					frames: [1],
+					next: "Neutral",
+					speed: 0.25
+				}
 			}
 	}
 );
 
 	halladayChara = new createjs.Sprite( halladayCharaSheet, "Neutral" );
-	halladayChara.scaleX = 0.75;
-	halladayChara.scaleY = 0.75;
-	halladayChara.regY = halladayChara.getTransformedBounds().height / 2;
+	halladayChara.regX = halladayChara.getBounds().width / 2;
+	halladayChara.regY = halladayChara.getBounds().height;
+	halladayChara.scaleX = 0.5;
+	halladayChara.scaleY = 0.5;
 
 	halladayIcon = new createjs.Bitmap( mainGameQueue.getResult( "jamieIcon" ) );
 	if ( halladayIcon.getTransformedBounds().width > halladayIcon.getTransformedBounds().height )
@@ -1026,8 +1056,8 @@ function level1Loaded()
 			{
 				regX: 0,
 				regY: 0,
-				width: 367,
-				height: 311
+				width: 525,
+				height: 459
 			},
 		animations:
 			{
@@ -1048,10 +1078,10 @@ function level1Loaded()
 	}
 	);
 	level1Boss = new createjs.Sprite( level1BossSheet, "Neutral" );
-	level1Boss.scaleX = 1.5;
-	level1Boss.scaleY = 1.5;
-	level1Boss.regX = 367 / 2;
-	level1Boss.regY = 311 * 0.80;
+	level1Boss.regX = level1Boss.getBounds().width * 0.35;
+	level1Boss.regY = level1Boss.getBounds().height * 0.9;
+	level1Boss.scaleX = 0.45;
+	level1Boss.scaleY = 0.45;
 
 	level1BossIcon = new createjs.Bitmap( Level1Queue[0].getResult( "level1BossIcon" ) );
 	if ( level1BossIcon.getTransformedBounds().width > level1BossIcon.getTransformedBounds().height )
@@ -1065,8 +1095,8 @@ function level1Loaded()
 		level1BossIcon.scaleY = 64 / level1BossIcon.getBounds().height;
 	}
 
-	level1BossIcon.regX = level1BossIcon.getTransformedBounds().width;
-	level1BossIcon.regY = level1BossIcon.getTransformedBounds().height;
+	level1BossIcon.regX = level1BossIcon.getBounds().width;
+	level1BossIcon.regY = level1BossIcon.getBounds().height;
 
 	level1Frame = new createjs.Bitmap( Level1Queue[0].getResult( "level1Frame" ) );
 
@@ -1255,32 +1285,27 @@ function level3Loaded()
 			{
 				regX: 0,
 				regY: 0,
-				width: 367,
-				height: 311
+				width: 694,
+				height: 1076
 			},
 		animations:
 			{
 				Neutral: [0, 0],
 				Run:
 				{
-					frames: [0, 2],
+					frames: [0, 1],
 					next: "Neutral",
 					speed: 0.25
 				},
-				Attack1:
-				{
-					frames: [1],
-					next: "Neutral",
-					speed: 0.25
-				}
+				Attack1:[2, 23, "Neutral", 1.5]
 			}
 	}
 	);
 	level3Boss = new createjs.Sprite( level3BossSheet, "Neutral" );
-	level3Boss.scaleX = 1.5;
-	level3Boss.scaleY = 1.5;
-	level3Boss.regX = 367 / 2;
-	level3Boss.regY = 311 * 0.80;
+	level3Boss.regX = level3Boss.getBounds().width * 0.5;
+	level3Boss.regY = level3Boss.getBounds().height*0.95;
+	level3Boss.scaleX = 0.45;
+	level3Boss.scaleY = 0.45;
 
 	level3BossIcon = new createjs.Bitmap( Level3Queue[0].getResult( "level3BossIcon" ) );
 	if ( level3BossIcon.getTransformedBounds().width > level3BossIcon.getTransformedBounds().height )
@@ -1293,8 +1318,8 @@ function level3Loaded()
 		level3BossIcon.scaleX = 64 / level3BossIcon.getBounds().height;
 		level3BossIcon.scaleY = 64 / level3BossIcon.getBounds().height;
 	}
-	level3BossIcon.regX = level3BossIcon.getTransformedBounds().width;
-	level3BossIcon.regY = level3BossIcon.getTransformedBounds().height;
+	level3BossIcon.regX = level3BossIcon.getBounds().width;
+	level3BossIcon.regY = level3BossIcon.getBounds().height;
 
 	level3Frame = new createjs.Bitmap( Level3Queue[0].getResult( "level3Frame" ) );
 
@@ -1628,7 +1653,7 @@ function shortRangeAttack( x, y, width, height, characterSprite )
 			pixelTest.y = this.y + this.characterSprite.y;
 			pixelTest.scaleX = this.width;
 			pixelTest.scaleY = this.height;
-			return ndgmr.checkPixelCollision( pixelTest, theSpriteTo, 0 );
+			return ndgmr.checkPixelCollision( pixelTest, theSpriteTo, 0.25 );
 		}
 	}
 }
@@ -1701,7 +1726,7 @@ function longRangeAttack( x, y, character, projectileSprite, velocity, limit )
 		{
 			if ( this.array[i].sprite.visible )
 			{
-				if ( ndgmr.checkPixelCollision( this.array[i].sprite, theSpriteTo, 0 ) ) return this.array[i];
+				if ( ndgmr.checkPixelCollision( this.array[i].sprite, theSpriteTo, 0.25 ) ) return this.array[i];
 			}
 		}
 		return false;
@@ -2106,7 +2131,7 @@ function enemyMovement()
 			if ( distance < gameEngine.CANVASWIDTH * 1.25 && !enemies[i].attacker.collideSprite( player.moveable.sprite ) && enemies[i].moveable.sprite.currentAnimation != "Attack1" )
 			{
 				if ( enemies[i].moveable.sprite.currentAnimation != "Run" ) enemies[i].moveable.sprite.gotoAndPlay( "Run" );
-				if ( Math.abs( enemies[i].moveable.position.x - player.moveable.position.x ) < ( player.moveable.sprite.getTransformedBounds().width / 2 ) + ( enemies[i].moveable.sprite.getTransformedBounds().width / 2 ) ) moveAwayPlayer( enemies[i].moveable, false, true );
+				if ( Math.abs( enemies[i].moveable.position.x - player.moveable.position.x ) < ( player.moveable.sprite.getTransformedBounds().width * 0.75 ) ) moveAwayPlayer( enemies[i].moveable, false, true );
 				else moveToPlayer( enemies[i].moveable );
 
 				if ( enemies[i].moveable.facing == "right" )
@@ -2164,12 +2189,13 @@ function bossUpdate()
 	{
 		boss.attacker.update();
 		var distance = boss.moveable.position.subtract( player.moveable.position ).length()
-		if ( distance < gameEngine.CANVASWIDTH * 1.25 && !boss.attacker.collideSprite( player.moveable.sprite ) )
+		if ( distance < gameEngine.CANVASWIDTH * 1.25 && !boss.attacker.collideSprite( player.moveable.sprite ) && boss.moveable.sprite.currentAnimation != "Attack1" )
 		{
 			if ( bossMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) bossMusic.play();
 			if ( levelMusic.playState == createjs.Sound.PLAY_SUCCEEDED ) levelMusic.stop( { loop: -1 } );
-			moveToPlayer( boss.moveable );
-
+			if ( Math.abs( boss.moveable.position.x - player.moveable.position.x ) < ( player.moveable.sprite.getTransformedBounds().width * 0.75 ) ) moveAwayPlayer( boss.moveable, false, true );
+			else moveToPlayer( boss.moveable );
+			if ( boss.moveable.sprite.currentAnimation != "Run" ) boss.moveable.sprite.gotoAndPlay( "Run" );
 			if ( boss.moveable.facing == "right" )
 			{
 				if ( boss.moveable.sprite.scaleX < 0 )
@@ -2414,32 +2440,32 @@ function invisibilityUpdate()
 
 function loadJamie()
 {
-	player = new moveableAttacker( new moveableObject( jamieChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack( jamieChara.getTransformedBounds().width, -jamieChara.getTransformedBounds().height / 2, 25, 20 ), 100 );
+	player = new moveableAttacker( new moveableObject( jamieChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack( jamieChara.getTransformedBounds().width * 0.25, -jamieChara.getTransformedBounds().height * 0.75, 40, 80 ), 100 );
 	player.moveable.sprite.on( "animationend", function ( evt )
 	{
 		if ( evt.name == "Attack1" ) playerAttack();
 	} );
 	player.attacker.characterSprite = player.moveable.sprite;
-	player.attacker.debugSprite = pixel.clone();
+	//player.attacker.debugSprite = pixel.clone();
 	spriteArray.push( player.moveable );
 	spriteContainer.addChild( player.moveable.sprite );
-	spriteContainer.addChild( player.attacker.debugSprite );
+	//spriteContainer.addChild( player.attacker.debugSprite );
 	playerIcon = jamieIcon;
 }
 
 function loadHalladay()
 {
 	//player = new moveableAttacker( new moveableObject( halladayChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new longRangeAttack( halladayChara.getTransformedBounds().width, -halladayChara.getTransformedBounds().height / 2, null, powerStar.clone(), new vec2( 10, 0 ), 3 ), 100 );
-	player = new moveableAttacker( new moveableObject( halladayChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack( halladayChara.getTransformedBounds().width, -halladayChara.getTransformedBounds().height / 2, 25, 20 ), 100 );
+	player = new moveableAttacker( new moveableObject( halladayChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack( halladayChara.getTransformedBounds().width * 0.25, -halladayChara.getTransformedBounds().height * 0.75, 40, 80 ), 100 );
 	player.moveable.sprite.on( "animationend", function ( evt )
 	{
 		if ( evt.name == "Attack1" ) playerAttack();
 	} );
 	player.attacker.characterSprite = player.moveable.sprite;
-	player.attacker.debugSprite = pixel.clone();
+	//player.attacker.debugSprite = pixel.clone();
 	spriteArray.push( player.moveable );
 	spriteContainer.addChild( player.moveable.sprite );
-	spriteContainer.addChild( player.attacker.debugSprite );
+	//spriteContainer.addChild( player.attacker.debugSprite );
 	playerIcon = halladayIcon;
 }
 
@@ -2574,7 +2600,7 @@ function level1Init()
 		}
 	}
 
-	boss = new moveableAttacker( new moveableObject( level1Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( 0, -level1Boss.getTransformedBounds().height / 8, level1Boss.getTransformedBounds().width, 10 ), 10 );
+	boss = new moveableAttacker( new moveableObject( level1Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( level1Boss.getTransformedBounds().width *0.25, -level1Boss.getTransformedBounds().height * 0.5, 50, 50 ), 10 );
 	boss.icon = level1BossIcon.clone();
 
 	boss.icon.x = gameEngine.CANVASWIDTH;
@@ -2968,7 +2994,7 @@ function level3Init()
 
 	spriteContainerBackdrops = new Array();
 
-	boss = new moveableAttacker( new moveableObject( level3Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( 0, -level3Boss.getTransformedBounds().height / 8, level3Boss.getTransformedBounds().width, 10 ), 30 );
+	boss = new moveableAttacker( new moveableObject( level3Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( 0, -level3Boss.getTransformedBounds().height * 0.2, level3Boss.getTransformedBounds().width * 0.5, 100 ), 30 );
 
 	boss.icon = level3BossIcon.clone();
 	boss.icon.x = gameEngine.CANVASWIDTH;
@@ -3584,91 +3610,92 @@ function andrewMain()
 	titleQueue.push( new createjs.LoadQueue( true, "assets/" ) );
 	createjs.Sound.alternateExtensions = ["mp3"];
 	titleQueue[0].installPlugin( createjs.Sound );
-	titleQueue[0].on( "complete", titleLoaded, this );
-	titleQueue[0].loadManifest( titleManifest );
+	titleQueue[0].on( "complete", function(){titleLoaded(); instructionsQueue[0].load();}, this );
+	titleQueue[0].loadManifest( titleManifest, false );
 	gameEngine.addModeLooper( "title", new gameEngine.updateModeLooper( titleInit, titleDelete, titleUpdate, titleQueue ) );
 
 	instructionsQueue = new Array();
 	instructionsQueue.push( new createjs.LoadQueue( true, "assets/" ) );
-	instructionsQueue[0].on( "complete", instructionsLoaded, this );
-	instructionsQueue[0].loadManifest( instructionsManifest );
+	instructionsQueue[0].on( "complete", function () { instructionsLoaded(); creditsQueue[0].load(); }, this );
+	instructionsQueue[0].loadManifest( instructionsManifest, false );
 	gameEngine.addModeLooper( "instructions", new gameEngine.updateModeLooper( instructionsInit, instructionsDelete, instructionsUpdate, instructionsQueue ) );
 
 	creditsQueue = new Array();
 	creditsQueue.push( new createjs.LoadQueue( true, "assets/" ) );
 	creditsQueue[0].installPlugin( createjs.Sound );
-	creditsQueue[0].on( "complete", creditsLoaded, this );
-	creditsQueue[0].loadManifest( creditsManifest );
+	creditsQueue[0].on( "complete", function () { creditsLoaded(); characterSelectQueue[0].load(); }, this );
+	creditsQueue[0].loadManifest( creditsManifest, false );
 	gameEngine.addModeLooper( "credits", new gameEngine.updateModeLooper( creditsInit, creditsDelete, creditsUpdate, creditsQueue ) );
-
-	gameoverQueue = new Array();
-	gameoverQueue.push( new createjs.LoadQueue( true, "assets/" ) );
-	gameoverQueue[0].installPlugin( createjs.Sound );
-	gameoverQueue[0].on( "complete", gameoverLoaded, this );
-	gameoverQueue[0].loadManifest( gameoverManifest );
-	gameEngine.addModeLooper( "gameover", new gameEngine.updateModeLooper( gameoverInit, gameoverDelete, gameoverUpdate, gameoverQueue ) );
-
-	winQueue = new Array();
-	winQueue.push( new createjs.LoadQueue( true, "assets/" ) );
-	winQueue[0].on( "complete", winLoaded, this );
-	winQueue[0].loadManifest( winManifest );
-	gameEngine.addModeLooper( "win", new gameEngine.updateModeLooper( winInit, winDelete, winUpdate, winQueue ) );
-
-	trueWinQueue = new Array();
-	trueWinQueue.push( new createjs.LoadQueue( true, "assets/" ) );
-	trueWinQueue[0].on( "complete", trueWinLoaded, this );
-	trueWinQueue[0].loadManifest( trueWinManifest );
-	gameEngine.addModeLooper( "trueWin", new gameEngine.updateModeLooper( trueWinInit, trueWinDelete, trueWinUpdate, trueWinQueue ) );
 
 	characterSelectQueue = new Array();
 	characterSelectQueue.push( new createjs.LoadQueue( true, "assets/" ) );
 	characterSelectQueue[0].installPlugin( createjs.Sound );
-	characterSelectQueue[0].on( "complete", characterSelectLoaded, this );
-	characterSelectQueue[0].loadManifest( characterSelectManifest );
+	characterSelectQueue[0].on( "complete", function () { characterSelectLoaded(); gameoverQueue[0].load();}, this );
+	characterSelectQueue[0].loadManifest( characterSelectManifest, false );
 	gameEngine.addModeLooper( "characterSelect", new gameEngine.updateModeLooper( characterSelectInit, characterSelectDelete, characterSelectUpdate, characterSelectQueue ) );
+
+	gameoverQueue = new Array();
+	gameoverQueue.push( new createjs.LoadQueue( true, "assets/" ) );
+	gameoverQueue[0].installPlugin( createjs.Sound );
+	gameoverQueue[0].on( "complete", function () { gameoverLoaded(); mainGameQueue.load(); }, this );
+	gameoverQueue[0].loadManifest( gameoverManifest, false );
+	gameEngine.addModeLooper( "gameover", new gameEngine.updateModeLooper( gameoverInit, gameoverDelete, gameoverUpdate, gameoverQueue ) );
 
 	mainGameQueue = new createjs.LoadQueue( true, "assets/" );
 	mainGameQueue.installPlugin( createjs.Sound );
-	mainGameQueue.on( "complete", mainGameLoaded, this );
-	mainGameQueue.loadManifest( mainGameManifest );
+	mainGameQueue.on( "complete", function () { mainGameLoaded(); Level1Queue[0].load(); }, this );
+	mainGameQueue.loadManifest( mainGameManifest, false );
 
 	Level1Queue = new Array();
 	Level1Queue.push( new createjs.LoadQueue( true, "assets/" ) );
 	Level1Queue[0].installPlugin( createjs.Sound );
-	Level1Queue[0].on( "complete", level1Loaded );
-	Level1Queue[0].loadManifest( Level1Manifest );
+	Level1Queue[0].on( "complete", function () { level1Loaded(); Level2Queue[0].load(); } );
+	Level1Queue[0].loadManifest( Level1Manifest, false );
 	Level1Queue.push( mainGameQueue );
 	gameEngine.addModeLooper( "level1", new gameEngine.updateModeLooper( level1Init, level1Delete, level1Update, Level1Queue ) );
 
 	Level2Queue = new Array();
 	Level2Queue.push( new createjs.LoadQueue( true, "assets/" ) );
 	Level2Queue[0].installPlugin( createjs.Sound );
-	Level2Queue[0].on( "complete", level2Loaded );
-	Level2Queue[0].loadManifest( Level2Manifest );
+	Level2Queue[0].on( "complete", function () { level2Loaded(); Level3Queue[0].load(); } );
+	Level2Queue[0].loadManifest( Level2Manifest, false );
 	Level2Queue.push( mainGameQueue );
 	gameEngine.addModeLooper( "level2", new gameEngine.updateModeLooper( level2Init, level2Delete, level2Update, Level2Queue ) );
 
 	Level3Queue = new Array();
 	Level3Queue.push( new createjs.LoadQueue( true, "assets/" ) );
 	Level3Queue[0].installPlugin( createjs.Sound );
-	Level3Queue[0].on( "complete", level3Loaded );
-	Level3Queue[0].loadManifest( Level3Manifest );
+	Level3Queue[0].on( "complete", function () { level3Loaded(); Level4Queue[0].load(); } );
+	Level3Queue[0].loadManifest( Level3Manifest, false );
 	Level3Queue.push( mainGameQueue );
 	gameEngine.addModeLooper( "level3", new gameEngine.updateModeLooper( level3Init, level3Delete, level3Update, Level3Queue ) );
 
 	Level4Queue = new Array();
 	Level4Queue.push( new createjs.LoadQueue( true, "assets/" ) );
 	Level4Queue[0].installPlugin( createjs.Sound );
-	Level4Queue[0].on( "complete", level4Loaded );
-	Level4Queue[0].loadManifest( Level4Manifest );
+	Level4Queue[0].on( "complete", function () { level4Loaded(); Level5Queue[0].load(); } );
+	Level4Queue[0].loadManifest( Level4Manifest, false );
 	Level4Queue.push( mainGameQueue );
 	gameEngine.addModeLooper( "level4", new gameEngine.updateModeLooper( level4Init, level4Delete, level4Update, Level4Queue ) );
 
 	Level5Queue = new Array();
 	Level5Queue.push( new createjs.LoadQueue( true, "assets/" ) );
 	Level5Queue[0].installPlugin( createjs.Sound );
-	Level5Queue[0].on( "complete", level5Loaded );
-	Level5Queue[0].loadManifest( Level5Manifest );
+	Level5Queue[0].on( "complete", function () { level5Loaded(); winQueue[0].load(); } );
+	Level5Queue[0].loadManifest( Level5Manifest, false );
 	Level5Queue.push( mainGameQueue );
 	gameEngine.addModeLooper( "level5", new gameEngine.updateModeLooper( level5Init, level5Delete, level5Update, Level5Queue ) );
+
+	winQueue = new Array();
+	winQueue.push( new createjs.LoadQueue( true, "assets/" ) );
+	winQueue[0].on( "complete", function () { winLoaded(); trueWinQueue[0].load(); }, this );
+	winQueue[0].loadManifest( winManifest, false );
+	gameEngine.addModeLooper( "win", new gameEngine.updateModeLooper( winInit, winDelete, winUpdate, winQueue ) );
+
+	trueWinQueue = new Array();
+	trueWinQueue.push( new createjs.LoadQueue( true, "assets/" ) );
+	trueWinQueue[0].on( "complete", function () { trueWinLoaded();}, this );
+	trueWinQueue[0].loadManifest( trueWinManifest, false );
+	gameEngine.addModeLooper( "trueWin", new gameEngine.updateModeLooper( trueWinInit, trueWinDelete, trueWinUpdate, trueWinQueue ) );
+	titleQueue[0].load();
 }
