@@ -2254,7 +2254,7 @@ function enemyMovement()
 				if ( enemies[i].moveable.sprite.currentAnimation != "Run" ) enemies[i].moveable.sprite.gotoAndPlay( "Run" );
 				if ( Math.abs( enemies[i].moveable.position.x - player.moveable.position.x ) < ( player.moveable.sprite.getTransformedBounds().width * 0.25 ) ) moveAwayPlayer( enemies[i].moveable, false, true );
 				else moveToPlayer( enemies[i].moveable );
-
+				stageBounds.contain( enemies[i].moveable );
 				if ( enemies[i].moveable.facing == "right" )
 				{
 					if ( enemies[i].moveable.sprite.scaleX < 0 )
@@ -2316,6 +2316,7 @@ function bossUpdate()
 			if ( levelMusic.playState == createjs.Sound.PLAY_SUCCEEDED ) levelMusic.stop( { loop: -1 } );
 			if ( Math.abs( boss.moveable.position.x - player.moveable.position.x ) < ( player.moveable.sprite.getTransformedBounds().width * 0.25 ) ) moveAwayPlayer( boss.moveable, false, true );
 			else moveToPlayer( boss.moveable );
+			stageBounds.contain( boss.moveable );
 			if ( boss.moveable.sprite.currentAnimation != "Run" ) boss.moveable.sprite.gotoAndPlay( "Run" );
 			if ( boss.moveable.facing == "right" )
 			{
@@ -2359,8 +2360,8 @@ function TRAXBossUpdate()
 		{
 			if ( bossMusic.playState != createjs.Sound.PLAY_SUCCEEDED ) bossMusic.play();
 			if ( levelMusic.playState == createjs.Sound.PLAY_SUCCEEDED ) levelMusic.stop( { loop: -1 } );
-			if ( Math.abs( boss.moveable.position.x - player.moveable.position.x ) < ( player.moveable.sprite.getTransformedBounds().width ) + ( boss.moveable.sprite.getTransformedBounds().width ) ) moveAwayPlayer( boss.moveable, false, true );
-			else if ( Math.abs( boss.moveable.position.x - player.moveable.position.x ) > ( ( player.moveable.sprite.getTransformedBounds().width ) + ( boss.moveable.sprite.getTransformedBounds().width ) ) * 1.25 ) moveToPlayer( boss.moveable );
+			if ( Math.abs( boss.moveable.position.x - player.moveable.position.x ) < ( player.moveable.sprite.getTransformedBounds().width ) ) moveAwayPlayer( boss.moveable, false, true );
+			else if ( Math.abs( boss.moveable.position.x - player.moveable.position.x ) > ( ( player.moveable.sprite.getTransformedBounds().width ) + ( boss.moveable.sprite.getTransformedBounds().width ))  ) moveToPlayer( boss.moveable );
 			else
 			{
 				var posToTest = player.moveable.position.subtract( boss.moveable.position ).normalize().multiply( boss.moveable.velocity );
@@ -2424,7 +2425,7 @@ function moveToPlayer( enemyMovable )
 			enemyMovable.facing = "left";
 		}
 	}
-	stageBounds.contain( enemyMovable );
+	
 }
 
 function moveAwayPlayer( enemyMovable, ignoreX, ignoreY )
@@ -2448,7 +2449,6 @@ function moveAwayPlayer( enemyMovable, ignoreX, ignoreY )
 			enemyMovable.facing = "left";
 		}
 	}
-	stageBounds.contain( enemyMovable );
 }
 
 function cameraFollowPlayer()
