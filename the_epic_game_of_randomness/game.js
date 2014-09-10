@@ -868,7 +868,7 @@ function mainGameLoaded()
 					regX: 0,
 					regY: 0,
 					width: 357,
-					height: 418,
+					height: 415,
 				},
 			animations:
 				{
@@ -887,7 +887,7 @@ function mainGameLoaded()
 					},
 					Attack2:
 					{
-						frames: [3],
+						frames: [3,5],
 						next: "Neutral",
 						speed: 0.25
 					}
@@ -896,7 +896,7 @@ function mainGameLoaded()
 	);
 
 	jamieChara = new createjs.Sprite( jamieCharaSheet, "Neutral" );
-	jamieChara.regX = jamieChara.getBounds().width / 2;
+	jamieChara.regX = jamieChara.getBounds().width * 0.4;
 	jamieChara.regY = jamieChara.getBounds().height;
 	jamieChara.scaleX = 0.5;
 	jamieChara.scaleY = 0.5;
@@ -2599,7 +2599,7 @@ function invisibilityUpdate()
 function loadJamie()
 {
 	player = new moveableAttacker( new moveableObject( jamieChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack( jamieChara.getTransformedBounds().width * 0.25, -jamieChara.getTransformedBounds().height * 0.75, 40, 80 ), 100 );
-	player.attacker2 = new shortRangeAttack( jamieChara.getTransformedBounds().width * 0.25, -jamieChara.getTransformedBounds().height * 0.75, 40, 80 );
+	player.attacker2 = new shortRangeAttack( 0, -jamieChara.getTransformedBounds().height, jamieChara.getTransformedBounds().width * 0.5, jamieChara.getTransformedBounds().height );
 	player.moveable.sprite.on( "animationend", function ( evt )
 	{
 		if ( evt.name == "Attack1" ) playerAttack();
@@ -2607,12 +2607,12 @@ function loadJamie()
 	} );
 	player.attacker.characterSprite = player.moveable.sprite;
 	player.attacker2.characterSprite = player.moveable.sprite;
-	player.attacker.debugSprite = pixel.clone();
-	player.attacker2.debugSprite = pixel.clone();
+	//player.attacker.debugSprite = pixel.clone();
+	//player.attacker2.debugSprite = pixel.clone();
 	spriteArray.push( player.moveable );
 	spriteContainer.addChild( player.moveable.sprite );
-	spriteContainer.addChild( player.attacker.debugSprite );
-	spriteContainer.addChild( player.attacker2.debugSprite );
+	//spriteContainer.addChild( player.attacker.debugSprite );
+	//spriteContainer.addChild( player.attacker2.debugSprite );
 	playerIcon = jamieIcon;
 }
 
@@ -2747,12 +2747,12 @@ function level1Init()
 	boss.icon.x = gameEngine.CANVASWIDTH;
 	boss.icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height - 5;
 	boss.attacker.characterSprite = boss.moveable.sprite;
-	boss.attacker.debugSprite = pixel.clone();
+	//boss.attacker.debugSprite = pixel.clone();
 	boss.moveable.sprite.on( "animationend", function ( evt ) { if ( evt.name == "Attack1" ) bossAttack(); } );
 	spriteArray.push( boss.moveable );
 	stageBounds.contain( boss.moveable );
 	spriteContainer.addChild( boss.moveable.sprite );
-	spriteContainer.addChild( boss.attacker.debugSprite );
+	//spriteContainer.addChild( boss.attacker.debugSprite );
 	enemies = new Array();
 	for ( var i = 0; i < 10; i++ )
 	{
