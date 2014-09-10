@@ -3358,7 +3358,7 @@ function level4Init()
 	spriteContainer.addChild( boss.moveable.sprite );
 	//spriteContainer.addChild( boss.attacker.debugSprite );
 	enemies = new Array();
-	for ( var i = 0; i < 75; i++ )
+	for ( var i = 0; i < 60; i++ )
 	{
 		enemies.push( new moveableAttacker( new moveableObject( level4Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level4Enemy.getTransformedBounds().width / 5, -level4Enemy.getTransformedBounds().height * 0.8, 40, level4Enemy.getTransformedBounds().height / 2 ), 4 ) );
 		enemies[i].attacker.characterSprite = enemies[i].moveable.sprite;
@@ -3519,7 +3519,7 @@ function level4Update()
 //#region level5
 function level5Init()
 {
-	var MAXDISTANCE = 15000;
+	var MAXDISTANCE = 10000;
 	spriteArray = new Array();
 	spriteContainer = new createjs.Container();
 	stageBounds = new cage( 400, gameEngine.CANVASHEIGHT, 0, MAXDISTANCE );
@@ -3608,7 +3608,7 @@ function level5Init()
 	else loadJamie();
 	stageBounds.contain(player.moveable);
 	powerStars = new Array();
-	for ( var i = 0; i < 64; i++ )
+	for ( var i = 0; i < 128; i++ )
 	{
 		powerStars.push( new moveableObject( powerStar.clone(), new vec2(( Math.random() * MAXDISTANCE ) + gameEngine.CANVASWIDTH, 0 ) ) );
 		spriteArray.push( powerStars[i] );
