@@ -3165,7 +3165,7 @@ function level3Init()
 	spriteArray.push( boss.moveable );
 	spriteContainer.addChild( boss.moveable.sprite );
 	enemies = new Array();
-	for ( var i = 0; i < 50; i++ )
+	for ( var i = 0; i < 40; i++ )
 	{
 		enemies.push( new moveableAttacker( new moveableObject( level3Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level3Enemy.getTransformedBounds().width / 3, -level3Enemy.getTransformedBounds().height * 0.9, 50, level3Enemy.getTransformedBounds().height / 2 ), 3 ) );
 		enemies[i].attacker.characterSprite = enemies[i].moveable.sprite;
