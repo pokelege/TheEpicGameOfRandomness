@@ -836,9 +836,10 @@ var Level4Manifest =
 		{ src: "images/level4/level4DoorRight.png", id: "level4DoorRight" },
 		{ src: "images/level4/level4Lights.png", id: "level4Lights" },
 		{ src: "images/level4/level4Table.png", id: "level4Table" },
+		{ src: "images/level4/level4King.png", id: "level4King" },
 		{ src: "audio/level4/level4Music.mp3", id: "level4Music" }
 	];
-var Level4Queue, level4Frame, level4Enemy, level4EnemyIcon, level4Boss, level4BossIcon, level4BackGround, level4Chair, level4DoorRight, level4Lights, level4Table, level4Music;
+var Level4Queue, level4Frame, level4Enemy, level4EnemyIcon, level4Boss, level4BossIcon, level4BackGround, level4Chair, level4DoorRight, level4Lights, level4Table, level4Music, level4King;
 
 var Level5Manifest =
 	[
@@ -1479,6 +1480,11 @@ function level4Loaded()
 
 	level4Lights = new createjs.Bitmap( Level4Queue[0].getResult( "level4Lights" ) );
 	level4Lights.regY = level4Lights.getBounds().height;
+
+	level4King = new createjs.Bitmap( Level4Queue[0].getResult( "level4King" ) );
+	level4King.regY = level4King.getBounds().height;
+	level4King.scaleX = 0.75;
+	level4King.scaleY = 0.75;
 
 	level4Table = new createjs.Bitmap( Level4Queue[0].getResult( "level4Table" ) );
 	level4Table.regY = level4Table.getBounds().height;
@@ -3332,6 +3338,7 @@ function level4Init()
 	backDrops = new Array();
 	backDrops.push( new moveableBackdrop( level4BackGround, 1, new vec2( 0, 0 ), new vec2( 0, 0 ), new vec2( level4BackGround.getBounds().width, 0 ), false, true ) );
 	backDrops.push( new moveableBackdrop( level4DoorRight, 0.9, new vec2( Math.random() * 20, 320 ), new vec2( 0, 0 ), new vec2( level4DoorRight.getTransformedBounds().width + 500, 0 ), false, true ) );
+	backDrops.push( new moveableBackdrop( level4King, 0.9, new vec2( Math.random() * 20, 320 ), new vec2( 0, 0 ), new vec2( level4King.getTransformedBounds().width + 500, 0 ), false, true ) );
 	backDrops.push( new moveableBackdrop( level4Chair, 1, new vec2(( level4Table.getTransformedBounds().width / 2 ) - ( level4Chair.getTransformedBounds().width / 2 ), 400 ), new vec2( 0, 0 ), new vec2( level4Chair.getTransformedBounds().width + 100, 0 ), false, true ) );
 	backDrops.push( new moveableBackdrop( level4Table, 1, new vec2( 0, 400 ), new vec2( 0, 0 ), new vec2( level4Table.getTransformedBounds().width + 100, 0 ), false, true ) );
 	backDrops.push( new moveableBackdrop( level4Lights, 1, new vec2( 0, 50 ), new vec2( 0, 0 ), new vec2( level4Lights.getTransformedBounds().width + 50, 0 ), false, true ) );
