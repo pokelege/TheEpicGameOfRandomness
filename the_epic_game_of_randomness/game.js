@@ -1963,8 +1963,9 @@ var backDrops;
 var MAXLIFE = 100;
 
 var jumpable;
-var MAXJUMPHEIGHT = -100;
+var MAXJUMPHEIGHT = -200;
 var primaryBuffer = false;
+var specialNotUsed = true;
 function playerMovement()
 {
 	var posToAdd = new vec2( 0, 0 );
@@ -2018,10 +2019,11 @@ function playerMovement()
 		player.moveable.sprite.gotoAndPlay( "Attack1" );
 		primaryBuffer = true;
 	}
-	else if ( !primaryBuffer && ( gameEngine.XPressed || gameEngine.OPressed ) && player.moveable.sprite.currentAnimation != "Attack1" && player.moveable.sprite.currentAnimation != "Attack2" ) //&& player.moveable.airDistance === 0 )
+	else if ( specialNotUsed && !primaryBuffer && ( gameEngine.XPressed || gameEngine.OPressed ) && player.moveable.sprite.currentAnimation != "Attack1" && player.moveable.sprite.currentAnimation != "Attack2" ) //&& player.moveable.airDistance === 0 )
 	{
 		player.moveable.sprite.gotoAndPlay( "Attack2" );
 		primaryBuffer = true;
+		specialNotUsed = false;
 	}
 	else if ( !( gameEngine.ZPressed || gameEngine.IPressed || gameEngine.XPressed || gameEngine.OPressed ) ) primaryBuffer = false;
 
@@ -2088,7 +2090,7 @@ function playerMovement()
 	{
 		if ( powerStars[i].sprite.visible )
 		{
-			if ( ndgmr.checkRectCollision( player.moveable.sprite, powerStars[i].sprite ) )
+			if ( ndgmr.checkPixelCollision( player.moveable.sprite, powerStars[i].sprite, 0.25 ) )
 			{
 				starGet.play();
 				powerStars[i].sprite.visible = false;
@@ -2101,7 +2103,7 @@ function playerMovement()
 	{
 		if ( easterEggs[i].sprite.visible )
 		{
-			if ( ndgmr.checkRectCollision( player.moveable.sprite, easterEggs[i].sprite ) )
+			if ( ndgmr.checkPixelCollision( player.moveable.sprite, easterEggs[i].sprite, 0.25 ) )
 			{
 				eggGet.play();
 				easterEggs[i].sprite.visible = false;
@@ -2578,7 +2580,7 @@ function updateTarget( newTarget )
 }
 
 var invisibleTimeLeft;
-var INVISIBLETIME = 3;
+var INVISIBLETIME = 1;
 
 function invisibilityUpdate()
 {
@@ -2614,6 +2616,7 @@ function loadJamie()
 	//spriteContainer.addChild( player.attacker.debugSprite );
 	//spriteContainer.addChild( player.attacker2.debugSprite );
 	playerIcon = jamieIcon;
+	specialNotUsed = true;
 }
 
 function loadHalladay()
@@ -2635,6 +2638,7 @@ function loadHalladay()
 	//spriteContainer.addChild( player.attacker.debugSprite );
 	//spriteContainer.addChild( player.attacker2.debugSprite );
 	playerIcon = halladayIcon;
+	specialNotUsed = true;
 }
 
 var score;
