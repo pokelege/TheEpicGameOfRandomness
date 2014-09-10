@@ -480,20 +480,20 @@ function titleLoaded()
 	playButton.on( "click", function ( evt ) { gameEngine.mode = "characterSelect"; titleMusic.stop(); } );
 	playButton.regX = playButton.getBounds().width / 2;
 	playButton.regY = playButton.getBounds().height / 2;
-	playButton.x = gameEngine.CANVASWIDTH / 2;
-	playButton.y = gameEngine.CANVASHEIGHT / 2;
+	playButton.x = gameEngine.CANVASWIDTH * 0.5;
+	playButton.y = gameEngine.CANVASHEIGHT *0.75;
 
 	instructionsButton = new createjs.Bitmap( titleQueue[0].getResult( "instructionsButton" ) );
 	instructionsButton.on( "click", function ( evt ) { gameEngine.mode = "instructions"; } );
 	instructionsButton.regX = instructionsButton.getBounds().width / 2;
-	instructionsButton.x = gameEngine.CANVASWIDTH / 2;
-	instructionsButton.y = playButton.getTransformedBounds().height + playButton.y + 5;
+	instructionsButton.x = gameEngine.CANVASWIDTH * 0.25;
+	instructionsButton.y = gameEngine.CANVASHEIGHT * 0.75;
 
 	creditsButton = new createjs.Bitmap( titleQueue[0].getResult( "creditsButton" ) );
 	creditsButton.on( "click", function ( evt ) { gameEngine.mode = "credits"; titleMusic.stop(); } );
 	creditsButton.regX = creditsButton.getBounds().width / 2;
-	creditsButton.x = gameEngine.CANVASWIDTH / 2;
-	creditsButton.y = instructionsButton.getTransformedBounds().height + instructionsButton.y + 5;
+	creditsButton.x = gameEngine.CANVASWIDTH *0.75;
+	creditsButton.y = gameEngine.CANVASHEIGHT * 0.75;
 
 
 	var audioSpriteSheet = new createjs.SpriteSheet
