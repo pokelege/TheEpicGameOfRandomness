@@ -735,7 +735,7 @@ function ( evt )
 	if ( evt.stageX < gameEngine.CANVASWIDTH / 2 )
 		characterMode = "jamie";
 	else characterMode = "halladay";
-	gameEngine.mode = "level2";
+	gameEngine.mode = "level1";
 	if ( titleMusic.playState == createjs.Sound.PLAY_SUCCEEDED )
 		titleMusic.stop();
 	score = null;
@@ -1690,7 +1690,7 @@ function longRangeAttack( x, y, character, projectileSprite, velocity, limit )
 	this.array = new Array();
 	for ( var i = 0; i < limit; i++ )
 	{
-		this.array.push( new moveableObject( projectileSprite.clone(), new vec2( 0, 0 ), velocity ) );
+		this.array.push( new moveableObject( projectileSprite.clone(), new vec2( 0, 0 ), new vec2(velocity.x, velocity.y) ) );
 		this.array[i].sprite.visible = false;
 	}
 	this.update = function ()
@@ -2846,7 +2846,7 @@ function level2Init()
 
 	spriteContainerBackdrops = new Array();
 
-	boss = new moveableAttacker( new moveableObject( level2Boss.clone(), new vec2( MAXDISTANCE, 0 ), 5 ), new longRangeAttack( level2Boss.getTransformedBounds().width * 0.5, -level2Boss.getTransformedBounds().height * 0.5, null, bullet, new vec2( 15, 0 ), 10 ), 20 );
+	boss = new moveableAttacker( new moveableObject( level2Boss.clone(), new vec2( 0, 0 ), 5 ), new longRangeAttack( level2Boss.getTransformedBounds().width * 0.5, -level2Boss.getTransformedBounds().height * 0.5, null, bullet, new vec2( 15, 0 ), 10 ), 20 );
 	boss.icon = level2BossIcon.clone();
 	boss.icon.x = gameEngine.CANVASWIDTH;
 	boss.icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height - 5;
