@@ -2134,7 +2134,7 @@ function punishJamie()
 		if ( !enemies[i].moveable.sprite.visible )
 		{
 			enemies[i].moveable.sprite.visible = true;
-			enemies[i].life = 5;
+			enemies[i].life = 100;
 		}
 	}
 }
@@ -2755,7 +2755,7 @@ function level1Init()
 		}
 	}
 
-	boss = new moveableAttacker( new moveableObject( level1Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( level1Boss.getTransformedBounds().width *0.25, -level1Boss.getTransformedBounds().height * 0.5, 50, 50 ), 10 );
+	boss = new moveableAttacker( new moveableObject( level1Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( level1Boss.getTransformedBounds().width *0.25, -level1Boss.getTransformedBounds().height * 0.5, 50, 50 ), 30 );
 	boss.icon = level1BossIcon.clone();
 
 	boss.icon.x = gameEngine.CANVASWIDTH;
@@ -2952,7 +2952,7 @@ function level2Init()
 
 	spriteContainerBackdrops = new Array();
 
-	boss = new moveableAttacker( new moveableObject( level2Boss.clone(), new vec2( MAXDISTANCE, 0 ), 5 ), new longRangeAttack( level2Boss.getTransformedBounds().width * 0.5, -level2Boss.getTransformedBounds().height * 0.5, null, bullet, new vec2( 15, 0 ), 10 ), 20 );
+	boss = new moveableAttacker( new moveableObject( level2Boss.clone(), new vec2( MAXDISTANCE, 0 ), 5 ), new longRangeAttack( level2Boss.getTransformedBounds().width * 0.5, -level2Boss.getTransformedBounds().height * 0.5, null, bullet, new vec2( 15, 0 ), 10 ), 30 );
 	boss.icon = level2BossIcon.clone();
 	boss.icon.x = gameEngine.CANVASWIDTH;
 	boss.icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height - 5;
@@ -3354,7 +3354,7 @@ function level4Init()
 
 	spriteContainerBackdrops = new Array();
 
-	boss = new moveableAttacker( new moveableObject( level4Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( 0, -level4Boss.getTransformedBounds().height * 0.65, 110, 30 ), 40 );
+	boss = new moveableAttacker( new moveableObject( level4Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( 0, -level4Boss.getTransformedBounds().height * 0.65, 110, 30 ), 30 );
 
 	stageBounds.contain( boss.moveable );
 
