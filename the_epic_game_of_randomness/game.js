@@ -836,7 +836,7 @@ var Level4Manifest =
 		{ src: "images/level4/level4DoorRight.png", id: "level4DoorRight" },
 		{ src: "images/level4/level4Lights.png", id: "level4Lights" },
 		{ src: "images/level4/level4Table.png", id: "level4Table" },
-		{ src: "images/level4/level4King.png", id: "level4King" },
+		{ src: "images/level4/level4King.jpg", id: "level4King" },
 		{ src: "audio/level4/level4Music.mp3", id: "level4Music" }
 	];
 var Level4Queue, level4Frame, level4Enemy, level4EnemyIcon, level4Boss, level4BossIcon, level4BackGround, level4Chair, level4DoorRight, level4Lights, level4Table, level4Music, level4King;
