@@ -735,7 +735,7 @@ function ( evt )
 	if ( evt.stageX < gameEngine.CANVASWIDTH / 2 )
 		characterMode = "jamie";
 	else characterMode = "halladay";
-	gameEngine.mode = "level4";
+	gameEngine.mode = "level1";
 	if ( titleMusic.playState == createjs.Sound.PLAY_SUCCEEDED )
 		titleMusic.stop();
 	score = null;
@@ -1524,8 +1524,8 @@ function level5Loaded()
 			{
 				regX: 0,
 				regY: 0,
-				width: 367,
-				height: 311
+				width: 339,
+				height: 481
 			},
 		animations:
 			{
@@ -1546,10 +1546,10 @@ function level5Loaded()
 	}
 	);
 	level5Boss = new createjs.Sprite( level5BossSheet, "Neutral" );
-	level5Boss.scaleX = 1.5;
-	level5Boss.scaleY = 1.5;
-	level5Boss.regX = 367 / 2;
-	level5Boss.regY = 311 * 0.80;
+	level5Boss.regX = level5Boss.getBounds().width / 2;
+	level5Boss.regY = level5Boss.getBounds().height;
+	level5Boss.scaleX = 0.5;
+	level5Boss.scaleY = 0.5;
 
 	level5BossIcon = new createjs.Bitmap( Level5Queue[0].getResult( "level5BossIcon" ) );
 	if ( level5BossIcon.getTransformedBounds().width > level5BossIcon.getTransformedBounds().height )
@@ -1562,8 +1562,8 @@ function level5Loaded()
 		level5BossIcon.scaleX = 64 / level5BossIcon.getBounds().height;
 		level5BossIcon.scaleY = 64 / level5BossIcon.getBounds().height;
 	}
-	level5BossIcon.regX = level5BossIcon.getTransformedBounds().width;
-	level5BossIcon.regY = level5BossIcon.getTransformedBounds().height;
+	level5BossIcon.regX = level5BossIcon.getBounds().width;
+	level5BossIcon.regY = level5BossIcon.getBounds().height;
 
 	level5Frame = new createjs.Bitmap( Level5Queue[0].getResult( "level5Frame" ) );
 
@@ -3434,18 +3434,18 @@ function level5Init()
 	}
 
 
-	boss = new moveableAttacker( new moveableObject( level5Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( 0, -level5Boss.getTransformedBounds().height / 8, level5Boss.getTransformedBounds().width, 10 ), 50 );
+	boss = new moveableAttacker( new moveableObject( level5Boss.clone(), new vec2( MAXDISTANCE, 0 ), 10 ), new shortRangeAttack( level5Boss.getTransformedBounds().width * 0.15, -level5Boss.getTransformedBounds().height * 0.725, level5Boss.getTransformedBounds().width * 0.35, level5Boss.getTransformedBounds().height * 0.35 ), 50 );
 	stageBounds.contain( boss.moveable );
 	boss.icon = level5BossIcon.clone();
 	boss.icon.x = gameEngine.CANVASWIDTH;
 	boss.icon.y = gameEngine.CANVASHEIGHT - healthBar.getTransformedBounds().height - 5;
 
 	boss.attacker.characterSprite = boss.moveable.sprite;
-	boss.attacker.debugSprite = pixel.clone();
+	//boss.attacker.debugSprite = pixel.clone();
 	boss.moveable.sprite.on( "animationend", function ( evt ) {if ( evt.name == "Attack1" ) bossAttack(); } );
 	spriteArray.push( boss.moveable );
 	spriteContainer.addChild( boss.moveable.sprite );
-	spriteContainer.addChild( boss.attacker.debugSprite );
+	//spriteContainer.addChild( boss.attacker.debugSprite );
 	enemies = new Array();
 	for ( var i = 0; i < 100; i++ )
 	{
@@ -3704,12 +3704,14 @@ function andrewMain()
 
 	winQueue = new Array();
 	winQueue.push( new createjs.LoadQueue( true, "assets/" ) );
+	winQueue[0].installPlugin( createjs.Sound );
 	winQueue[0].on( "complete", function () { winLoaded(); trueWinQueue[0].load(); }, this );
 	winQueue[0].loadManifest( winManifest, false );
 	gameEngine.addModeLooper( "win", new gameEngine.updateModeLooper( winInit, winDelete, winUpdate, winQueue ) );
 
 	trueWinQueue = new Array();
 	trueWinQueue.push( new createjs.LoadQueue( true, "assets/" ) );
+	trueWinQueue[0].installPlugin( createjs.Sound );
 	trueWinQueue[0].on( "complete", function () { trueWinLoaded();}, this );
 	trueWinQueue[0].loadManifest( trueWinManifest, false );
 	gameEngine.addModeLooper( "trueWin", new gameEngine.updateModeLooper( trueWinInit, trueWinDelete, trueWinUpdate, trueWinQueue ) );
