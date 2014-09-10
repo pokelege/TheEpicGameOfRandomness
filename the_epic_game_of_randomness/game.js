@@ -735,7 +735,7 @@ function ( evt )
 	if ( evt.stageX < gameEngine.CANVASWIDTH / 2 )
 		characterMode = "jamie";
 	else characterMode = "halladay";
-	gameEngine.mode = "level1";
+	gameEngine.mode = "level4";
 	if ( titleMusic.playState == createjs.Sound.PLAY_SUCCEEDED )
 		titleMusic.stop();
 	score = null;
@@ -2602,6 +2602,7 @@ function loadJamie()
 {
 	player = new moveableAttacker( new moveableObject( jamieChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack( jamieChara.getTransformedBounds().width * 0.25, -jamieChara.getTransformedBounds().height * 0.75, 40, 80 ), 100 );
 	player.attacker2 = new shortRangeAttack( 0, -jamieChara.getTransformedBounds().height, jamieChara.getTransformedBounds().width * 0.5, jamieChara.getTransformedBounds().height );
+	player.attacker2.damage = 10;
 	player.moveable.sprite.on( "animationend", function ( evt )
 	{
 		if ( evt.name == "Attack1" ) playerAttack();
@@ -2624,6 +2625,7 @@ function loadHalladay()
 	//player = new moveableAttacker( new moveableObject( halladayChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new longRangeAttack( halladayChara.getTransformedBounds().width, -halladayChara.getTransformedBounds().height / 2, null, powerStar.clone(), new vec2( 10, 0 ), 3 ), 100 );
 	player = new moveableAttacker( new moveableObject( halladayChara.clone(), new vec2( gameEngine.CANVASWIDTH * 0.25, gameEngine.CANVASHEIGHT * 0.75 ), 300 ), new shortRangeAttack( halladayChara.getTransformedBounds().width * 0.2, -halladayChara.getTransformedBounds().height * 0.75, 40, 80 ), 100 );
 	player.attacker2 = new shortRangeAttack( halladayChara.getTransformedBounds().width * 0.275, -halladayChara.getTransformedBounds().height * 0.775, 80, 80 );
+	player.attacker2.damage = 10;
 	player.moveable.sprite.on( "animationend", function ( evt )
 	{
 		if ( evt.name == "Attack1" ) playerAttack();
@@ -3358,7 +3360,7 @@ function level4Init()
 	spriteContainer.addChild( boss.moveable.sprite );
 	//spriteContainer.addChild( boss.attacker.debugSprite );
 	enemies = new Array();
-	for ( var i = 0; i < 60; i++ )
+	for ( var i = 0; i < 50; i++ )
 	{
 		enemies.push( new moveableAttacker( new moveableObject( level4Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level4Enemy.getTransformedBounds().width / 5, -level4Enemy.getTransformedBounds().height * 0.8, 40, level4Enemy.getTransformedBounds().height / 2 ), 4 ) );
 		enemies[i].attacker.characterSprite = enemies[i].moveable.sprite;
@@ -3579,7 +3581,7 @@ function level5Init()
 	spriteContainer.addChild( boss.moveable.sprite );
 	//spriteContainer.addChild( boss.attacker.debugSprite );
 	enemies = new Array();
-	for ( var i = 0; i < 100; i++ )
+	for ( var i = 0; i < 50; i++ )
 	{
 		enemies.push( new moveableAttacker( new moveableObject( level5Enemy.clone(), new vec2( gameEngine.CANVASWIDTH + ( ( MAXDISTANCE - gameEngine.CANVASWIDTH ) * Math.random() ), gameEngine.CANVASHEIGHT * Math.random() ), Math.random() * 10 ), new shortRangeAttack( level5Enemy.getTransformedBounds().width * 0.15, -level5Enemy.getTransformedBounds().height, level5Enemy.getTransformedBounds().width * 0.55, level5Enemy.getTransformedBounds().height * 0.6 ), 5 ) );
 		enemies[i].attacker.characterSprite = enemies[i].moveable.sprite;
