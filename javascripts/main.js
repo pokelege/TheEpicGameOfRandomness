@@ -451,12 +451,28 @@ if ( !!( window.addEventListener ) )
 	window.addEventListener( "DOMContentLoaded", gameEngine.main );
 	document.onkeydown = gameEngine.handleKeyDown;
 	document.onkeyup = gameEngine.handleKeyUp;
+	window.addEventListener("keydown", function(e)
+	{
+        	e.preventDefault();
+	}, false);
+		window.addEventListener("keyup", function(e)
+	{
+        	e.preventDefault();
+	}, false);
 }
 else
 { //MSIE
 	window.attachEvent( "onload", gameEngine.main );
 	document.onkeydown = gameEngine.handleKeyDown;
 	document.onkeyup = gameEngine.handleKeyUp;
+	window.attachEvent("keydown", function(e)
+	{
+        	e.preventDefault();
+	}, false);
+	window.attachEvent("keyup", function(e)
+	{
+        	e.preventDefault();
+	}, false);
 }
 
 var mute = false;
